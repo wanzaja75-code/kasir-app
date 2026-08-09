@@ -50,6 +50,131 @@ header p {
     padding-bottom: 8px;
 }
 
+/* ===== METHOD TABS ===== */
+.method-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    border-bottom: 2px solid #eef2f6;
+    padding-bottom: 8px;
+}
+
+.method-tabs .tab {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    background: transparent;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    color: #94a3b8;
+    transition: 0.2s;
+}
+
+.method-tabs .tab:hover {
+    color: #1a6d8a;
+    background: #f0f7fa;
+}
+
+.method-tabs .tab.active {
+    color: #0a2e4a;
+    background: #e8f0f8;
+    border-bottom: 3px solid #1a6d8a;
+}
+
+.method-content {
+    display: none;
+}
+
+.method-content.active {
+    display: block;
+}
+
+/* ===== INPUT GROUP ===== */
+.input-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 12px 14px;
+    border: 2px solid #dce3ec;
+    border-radius: 10px;
+    font-size: 16px;
+    min-width: 120px;
+    background: #fafcff;
+}
+
+.input-group input:focus {
+    border-color: #1a6d8a;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(26,109,138,0.15);
+}
+
+.input-group button {
+    padding: 12px 18px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.2s;
+    white-space: nowrap;
+}
+
+.btn-add {
+    background: #1a6d8a;
+    color: white;
+}
+.btn-add:hover {
+    background: #21809e;
+}
+
+/* ===== UPLOAD AREA ===== */
+.upload-area {
+    border: 3px dashed #dce3ec;
+    border-radius: 12px;
+    padding: 30px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+    background: #fafcff;
+    position: relative;
+}
+
+.upload-area:hover {
+    border-color: #1a6d8a;
+    background: #f0f7fa;
+}
+
+.upload-area span {
+    font-size: 48px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.upload-area p {
+    font-size: 15px;
+    color: #475569;
+}
+
+.upload-area small {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.upload-area input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
 /* ===== CAMERA ===== */
 .camera-container {
     position: relative;
@@ -129,74 +254,17 @@ header p {
     display: none;
 }
 
-/* ===== STATUS ===== */
-.camera-status {
-    padding: 8px 14px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    font-size: 14px;
-    font-weight: 500;
-    background: #fef9e7;
-    color: #7d6608;
-    border-left: 4px solid #f1c40f;
-    transition: 0.3s;
-}
-
-.camera-status.active {
-    background: #eafaf1;
-    color: #1a6d8a;
-    border-left-color: #1a6d8a;
-}
-
-.camera-status.error {
-    background: #fdedec;
-    color: #922b21;
-    border-left-color: #e74c3c;
-}
-
-.camera-status.success {
-    background: #d5f5e3;
-    color: #1a7a4a;
-    border-left-color: #27ae60;
-}
-
-/* ===== INPUT GROUP ===== */
-.input-group {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.input-group input {
-    flex: 1;
-    padding: 12px 14px;
-    border: 2px solid #dce3ec;
-    border-radius: 10px;
-    font-size: 16px;
-    min-width: 120px;
-    background: #fafcff;
-}
-
-.input-group input:focus {
-    border-color: #1a6d8a;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(26,109,138,0.15);
-}
-
-.input-group button {
-    padding: 12px 18px;
+.btn-scan {
+    width: 100%;
+    padding: 12px;
+    background: #0a2e4a;
+    color: white;
     border: none;
     border-radius: 10px;
     font-weight: 600;
     font-size: 15px;
     cursor: pointer;
     transition: 0.2s;
-    white-space: nowrap;
-}
-
-.btn-scan {
-    background: #0a2e4a;
-    color: white;
 }
 .btn-scan:hover {
     background: #13415e;
@@ -206,14 +274,6 @@ header p {
 }
 .btn-scan.active:hover {
     background: #c82333;
-}
-
-.btn-add {
-    background: #1a6d8a;
-    color: white;
-}
-.btn-add:hover {
-    background: #21809e;
 }
 
 /* ===== SCAN RESULT ===== */
@@ -246,6 +306,37 @@ header p {
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-5px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== STATUS ===== */
+.camera-status {
+    padding: 8px 14px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    background: #fef9e7;
+    color: #7d6608;
+    border-left: 4px solid #f1c40f;
+    transition: 0.3s;
+}
+
+.camera-status.active {
+    background: #eafaf1;
+    color: #1a6d8a;
+    border-left-color: #1a6d8a;
+}
+
+.camera-status.error {
+    background: #fdedec;
+    color: #922b21;
+    border-left-color: #e74c3c;
+}
+
+.camera-status.success {
+    background: #d5f5e3;
+    color: #1a7a4a;
+    border-left-color: #27ae60;
 }
 
 /* ===== QUICK PRODUCTS ===== */
@@ -436,6 +527,10 @@ header p {
     .cart-item .item-name {
         font-size: 13px;
         min-width: 60px;
+    }
+    .method-tabs .tab {
+        padding: 6px 12px;
+        font-size: 12px;
     }
 }
 
