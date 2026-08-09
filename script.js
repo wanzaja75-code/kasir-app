@@ -22,7 +22,7 @@ const productDB = {
 // STATE
 // ============================================
 let cart = [];
-let isScanning = false;
+let scannerActive = false;
 let scanTimeout = null;
 let stream = null;
 
@@ -35,13 +35,15 @@ const cameraOverlay = document.getElementById('cameraOverlay');
 const cameraPlaceholder = document.getElementById('cameraPlaceholder');
 const btnScan = document.getElementById('btnScan');
 const barcodeInput = document.getElementById('barcodeInput');
-const scanResult = document.getElementById('scanResult');
+const scanResult = document.getElementById('uploadResult');
 const cartList = document.getElementById('cartList');
 const subtotalEl = document.getElementById('subtotal');
 const discountInput = document.getElementById('discountInput');
 const discountAmountEl = document.getElementById('discountAmount');
 const grandTotalEl = document.getElementById('grandTotal');
 const quickProducts = document.getElementById('quickProducts');
+const fileInput = document.getElementById('fileInput');
+const uploadArea = document.getElementById('uploadArea');
 
 // ============================================
 // DATE TIME
@@ -72,7 +74,83 @@ function quickAdd(code) {
 renderQuickProducts();
 
 // ============================================
-// CAMERA - MENGGUNAKAN getUserImageData + ZXing
+// SWITCH METHOD
+// ============================================
+function switchMethod(method) {
+    // Update tabs
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.tab[onclick="switchMethod('${method}')"]`).classList.add('active');
+
+    // Update content
+    document.querySelectorAll('.method-content').forEach(c => c.classList.remove('active'));
+    document.getElementById(`method${method.charAt(0).toUpperCase() + method.slice(1)}`).classList.add('active');
+
+    // Stop camera jika switch
+    if (method !== 'camera' && scannerActive) {
+        stopCamera();
+    }
+
+    setStatus('📷 Mode: ' + (method === 'manual' ? 'Manual Input' : method === 'upload' ? 'Upload Foto' : 'Kamera Live'), '');
+}
+
+// ============================================
+// UPLOAD SCAN
+// ============================================
+fileInput.addEventListener('change', function(e) {
+    const file = this.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+            // Scan barcode dari gambar
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+            // Gunakan jsQR untuk scan
+            try {
+                const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "dontInvert",
+                });
+
+                if (code && code.data) {
+                    const barcode = code.data;
+                    console.log('✅ Barcode detected from image:', barcode);
+                    document.getElementById('barcodeInput').value = barcode;
+                    showUploadResult(`✅ Barcode terdeteksi: ${barcode}`, 'success');
+                    setTimeout(() => {
+                        addItemByBarcode();
+                    }, 500);
+                } else {
+                    showUploadResult('❌ Tidak ada barcode terdeteksi di gambar', 'error');
+                }
+            } catch (err) {
+                showUploadResult('❌ Gagal membaca gambar: ' + err.message, 'error');
+            }
+        };
+        img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+    this.value = ''; // Reset agar bisa upload ulang
+});
+
+function showUploadResult(msg, type = '') {
+    const el = document.getElementById('uploadResult');
+    el.textContent = msg;
+    el.className = 'scan-result show';
+    if (type) el.classList.add(type);
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+// ============================================
+// CAMERA - Menggunakan navigator.mediaDevices + jsQR
 // ============================================
 function setStatus(msg, type = '') {
     cameraStatus.textContent = msg;
@@ -80,16 +158,8 @@ function setStatus(msg, type = '') {
     if (type) cameraStatus.classList.add(type);
 }
 
-function showResult(msg, type = '') {
-    scanResult.textContent = msg;
-    scanResult.className = 'scan-result show';
-    if (type) scanResult.classList.add(type);
-    scanResult.style.display = 'block';
-    setTimeout(() => { scanResult.style.display = 'none'; }, 3000);
-}
-
 function toggleCamera() {
-    if (isScanning) {
+    if (scannerActive) {
         stopCamera();
     } else {
         startCamera();
@@ -100,14 +170,11 @@ async function startCamera() {
     try {
         setStatus('📷 Mengakses kamera...', '');
 
-        // Cek dukungan
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             setStatus('❌ Browser tidak support kamera', 'error');
-            showResult('❌ Browser tidak mendukung akses kamera', 'error');
             return;
         }
 
-        // Mulai stream
         stream = await navigator.mediaDevices.getUserMedia({
             video: {
                 facingMode: 'environment',
@@ -120,24 +187,22 @@ async function startCamera() {
         video.srcObject = stream;
         await video.play();
 
-        // Tampilkan video
         video.classList.add('active');
         cameraPlaceholder.classList.add('hidden');
         cameraOverlay.classList.add('active');
 
-        isScanning = true;
+        scannerActive = true;
         btnScan.textContent = '⏹️ Berhenti';
         btnScan.classList.add('active');
         setStatus('📷 Kamera aktif - Arahkan ke barcode', 'active');
 
-        // Mulai scan loop
+        // Start scan loop
         scanLoop();
 
-        // Auto stop 15 detik
         if (scanTimeout) clearTimeout(scanTimeout);
         scanTimeout = setTimeout(() => {
-            if (isScanning) {
-                showResult('⏱️ Waktu habis, scan ulang', '');
+            if (scannerActive) {
+                setStatus('⏱️ Waktu habis, scan ulang', '');
                 stopCamera();
             }
         }, 15000);
@@ -153,13 +218,12 @@ async function startCamera() {
             msg += err.message || 'Unknown error';
         }
         setStatus('❌ ' + msg, 'error');
-        showResult('❌ ' + msg, 'error');
         stopCamera();
     }
 }
 
 function stopCamera() {
-    isScanning = false;
+    scannerActive = false;
 
     if (stream) {
         stream.getTracks().forEach(t => t.stop());
@@ -183,10 +247,10 @@ function stopCamera() {
 }
 
 // ============================================
-// SCAN LOOP - Menggunakan Canvas + ZXing
+// SCAN LOOP - Menggunakan Canvas + jsQR
 // ============================================
 function scanLoop() {
-    if (!isScanning) return;
+    if (!scannerActive) return;
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -196,58 +260,36 @@ function scanLoop() {
 
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Dapatkan data gambar
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-    // Gunakan ZXing untuk decode
     try {
-        const codeReader = new ZXing.BrowserMultiFormatReader();
-        const result = codeReader.decodeFromImage(imageData);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "dontInvert",
+        });
 
-        if (result && result.text) {
-            const code = result.text.trim();
-            console.log('✅ Barcode detected:', code);
+        if (code && code.data) {
+            const barcode = code.data.trim();
+            console.log('✅ Barcode detected:', barcode);
 
-            barcodeInput.value = code;
+            document.getElementById('barcodeInput').value = barcode;
 
-            // Cek produk
-            const product = productDB[code];
+            const product = productDB[barcode];
             if (product) {
-                showResult(`✅ ${product.name} - Rp ${product.price.toLocaleString()}`, 'success');
+                setStatus(`✅ ${product.name} - Rp ${product.price.toLocaleString()}`, 'success');
                 if (navigator.vibrate) navigator.vibrate(100);
-                stopCamera();
-                addItemByBarcode();
-                return;
             } else {
-                showResult(`⚠️ Kode "${code}" tidak ditemukan`, 'error');
-                // Lanjut scan lagi
+                setStatus(`⚠️ Kode "${barcode}" tidak ditemukan`, 'error');
             }
+
+            stopCamera();
+            addItemByBarcode();
+            return;
         }
     } catch (e) {
         // Tidak ada barcode, lanjut scan
     }
 
-    // Lanjut scan lagi
     requestAnimationFrame(scanLoop);
-}
-
-// ============================================
-// LOAD ZXING
-// ============================================
-function loadZXing(callback) {
-    if (typeof ZXing !== 'undefined') {
-        callback();
-        return;
-    }
-
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/@zxing/browser@latest/umd/index.min.js';
-    script.onload = callback;
-    script.onerror = () => {
-        setStatus('❌ Gagal load library scanner', 'error');
-        showResult('❌ Gagal load scanner. Coba refresh.', 'error');
-    };
-    document.head.appendChild(script);
 }
 
 // ============================================
@@ -287,6 +329,16 @@ function addItemByBarcode() {
     updateTotals();
 
     showResult(`✅ ${product.name} ditambahkan!`, 'success');
+}
+
+function showResult(msg, type = '') {
+    const el = document.getElementById('scanResult') || document.getElementById('uploadResult');
+    if (!el) return;
+    el.textContent = msg;
+    el.className = 'scan-result show';
+    if (type) el.classList.add(type);
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 3000);
 }
 
 function removeItem(id) {
@@ -433,10 +485,5 @@ barcodeInput.addEventListener('keydown', (e) => {
 renderCart();
 updateTotals();
 
-// Load ZXing di background
-loadZXing(() => {
-    console.log('✅ ZXing loaded');
-    setStatus('📷 Siap scan - Klik "Mulai Kamera"', '');
-});
-
 console.log('📦 Produk:', Object.keys(productDB).length);
+console.log('📷 Pilih metode: Manual | Upload Foto | Kamera');
