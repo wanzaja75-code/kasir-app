@@ -22,7 +22,7 @@
         <!-- Pilihan Metode -->
         <div class="method-tabs">
             <button class="tab active" onclick="switchMethod('manual')">⌨️ Manual</button>
-            <button class="tab" onclick="switchMethod('upload')">📷 Upload Foto</button>
+            <button class="tab" onclick="switchMethod('upload')">📷 Upload</button>
             <button class="tab" onclick="switchMethod('camera')">📹 Kamera</button>
         </div>
 
@@ -38,8 +38,8 @@
         <div id="methodUpload" class="method-content">
             <div class="upload-area" id="uploadArea">
                 <span>📸</span>
-                <p>Klik atau tap untuk upload foto barcode</p>
-                <small>Support: PNG, JPG, WebP</small>
+                <p>Klik untuk upload foto barcode</p>
+                <small>PNG, JPG, WebP</small>
                 <input type="file" id="fileInput" accept="image/*" capture="environment" />
             </div>
             <div id="uploadResult" class="scan-result"></div>
@@ -51,11 +51,11 @@
                 <video id="video" autoplay playsinline muted></video>
                 <div class="camera-overlay" id="cameraOverlay">
                     <span>📷 Arahkan ke Barcode</span>
-                    <small>Otomatis berhenti setelah 15 detik</small>
+                    <small>Otomatis berhenti 15 detik</small>
                 </div>
                 <div class="camera-placeholder" id="cameraPlaceholder">
                     <span>📷</span>
-                    <p>Klik tombol di bawah untuk mulai scan</p>
+                    <p>Klik tombol di bawah</p>
                 </div>
             </div>
             <button id="btnScan" class="btn-scan" onclick="toggleCamera()">📷 Mulai Kamera</button>
@@ -65,12 +65,12 @@
         <div class="filter-section">
             <input type="text" id="searchInput" placeholder="🔍 Cari produk..." oninput="searchProduct()" />
             <div class="category-filter">
-                <button onclick="filterCategory('all')" class="cat-btn active" data-cat="all">📦 Semua</button>
-                <button onclick="filterCategory('Makanan')" class="cat-btn" data-cat="Makanan">🍜 Makanan</button>
-                <button onclick="filterCategory('Minuman')" class="cat-btn" data-cat="Minuman">🥤 Minuman</button>
-                <button onclick="filterCategory('Snack')" class="cat-btn" data-cat="Snack">🍿 Snack</button>
-                <button onclick="filterCategory('Rokok')" class="cat-btn" data-cat="Rokok">🚬 Rokok</button>
-                <button onclick="filterCategory('Lainnya')" class="cat-btn" data-cat="Lainnya">📦 Lainnya</button>
+                <button onclick="filterCategory('all')" class="cat-btn active" data-cat="all">Semua</button>
+                <button onclick="filterCategory('Makanan')" class="cat-btn" data-cat="Makanan">🍜</button>
+                <button onclick="filterCategory('Minuman')" class="cat-btn" data-cat="Minuman">🥤</button>
+                <button onclick="filterCategory('Snack')" class="cat-btn" data-cat="Snack">🍿</button>
+                <button onclick="filterCategory('Rokok')" class="cat-btn" data-cat="Rokok">🚬</button>
+                <button onclick="filterCategory('Lainnya')" class="cat-btn" data-cat="Lainnya">📦</button>
             </div>
         </div>
 
@@ -79,10 +79,10 @@
 
         <!-- Tambah Produk Baru -->
         <div class="add-product">
-            <h4>➕ Tambah Produk Baru</h4>
+            <h4>➕ Tambah Produk</h4>
             <div class="add-product-form">
-                <input type="text" id="newBarcode" placeholder="Kode Barcode" />
-                <input type="text" id="newName" placeholder="Nama Produk" />
+                <input type="text" id="newBarcode" placeholder="Kode" />
+                <input type="text" id="newName" placeholder="Nama" />
                 <select id="newCategory">
                     <option value="Makanan">🍜 Makanan</option>
                     <option value="Minuman">🥤 Minuman</option>
@@ -91,7 +91,7 @@
                     <option value="Lainnya">📦 Lainnya</option>
                 </select>
                 <input type="number" id="newPrice" placeholder="Harga" />
-                <button onclick="addNewProduct()">➕ Tambah</button>
+                <button onclick="addNewProduct()">➕</button>
             </div>
         </div>
     </div>
@@ -103,40 +103,42 @@
 
         <div class="total-section">
             <div class="total-row">
-                <span>Subtotal:</span>
+                <span>Subtotal</span>
                 <span id="subtotal">Rp 0</span>
             </div>
             <div class="total-row">
-                <span>Diskon (%):</span>
-                <input type="number" id="discountInput" value="0" min="0" max="100" />
-                <span>%</span>
+                <span>Diskon</span>
+                <div class="discount-group">
+                    <input type="number" id="discountInput" value="0" min="0" max="100" />
+                    <span>%</span>
+                </div>
             </div>
             <div class="total-row">
-                <span>Potongan:</span>
+                <span>Potongan</span>
                 <span id="discountAmount">Rp 0</span>
             </div>
             <div class="total-row grand-total">
-                <span>Total:</span>
+                <span>Total</span>
                 <span id="grandTotal">Rp 0</span>
             </div>
             
             <!-- Pembayaran -->
             <div class="total-row payment-row">
-                <span>💰 Uang Bayar:</span>
+                <span>💰 Uang Bayar</span>
                 <input type="number" id="paymentInput" value="0" min="0" />
             </div>
             <div class="total-row change-row">
-                <span>🔄 Kembalian:</span>
+                <span>🔄 Kembalian</span>
                 <span id="changeAmount">Rp 0</span>
             </div>
 
             <div class="total-actions">
-                <button class="btn-clear" onclick="clearCart()">🗑️ Kosongkan</button>
+                <button class="btn-clear" onclick="clearCart()">🗑️</button>
                 <button class="btn-print" onclick="printReceipt()">🖨️ Cetak</button>
-                <button class="btn-save" onclick="saveData()">💾 Simpan</button>
-                <button class="btn-load" onclick="loadData()">📂 Load</button>
-                <button class="btn-history" onclick="viewHistory()">📊 Riwayat</button>
-                <button class="btn-excel" onclick="exportExcel()">📊 Excel</button>
+                <button class="btn-save" onclick="saveData()">💾</button>
+                <button class="btn-load" onclick="loadData()">📂</button>
+                <button class="btn-history" onclick="viewHistory()">📊</button>
+                <button class="btn-excel" onclick="exportExcel()">📈</button>
             </div>
         </div>
     </div>
