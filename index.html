@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Kasir Scan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -11,8 +14,10 @@
     <!-- HEADER -->
     <header>
         <button onclick="toggleTheme()" class="theme-toggle">🌙</button>
-        <h1>🛒 Kasir Scan</h1>
-        <p id="datetime"></p>
+        <div class="header-content">
+            <h1>🛒 Kasir Scan</h1>
+            <p id="datetime"></p>
+        </div>
     </header>
 
     <!-- SCAN SECTION -->
@@ -30,7 +35,7 @@
         <div id="methodManual" class="method-content active">
             <div class="input-group">
                 <input type="text" id="barcodeInput" placeholder="Ketik kode barang..." autofocus />
-                <button class="btn-add" onclick="addItemByBarcode()">➕ Tambah</button>
+                <button class="btn-add" onclick="addItemByBarcode()">Tambah</button>
             </div>
         </div>
 
@@ -63,7 +68,7 @@
 
         <!-- Search & Category Filter -->
         <div class="filter-section">
-            <input type="text" id="searchInput" placeholder="🔍 Cari produk..." oninput="searchProduct()" />
+            <input type="text" id="searchInput" placeholder="Cari produk..." oninput="searchProduct()" />
             <div class="category-filter">
                 <button onclick="filterCategory('all')" class="cat-btn active" data-cat="all">Semua</button>
                 <button onclick="filterCategory('Makanan')" class="cat-btn" data-cat="Makanan">🍜</button>
@@ -91,7 +96,7 @@
                     <option value="Lainnya">📦 Lainnya</option>
                 </select>
                 <input type="number" id="newPrice" placeholder="Harga" />
-                <button onclick="addNewProduct()">➕</button>
+                <button onclick="addNewProduct()">+</button>
             </div>
         </div>
     </div>
@@ -124,17 +129,17 @@
             
             <!-- Pembayaran -->
             <div class="total-row payment-row">
-                <span>💰 Uang Bayar</span>
+                <span>Uang Bayar</span>
                 <input type="number" id="paymentInput" value="0" min="0" />
             </div>
             <div class="total-row change-row">
-                <span>🔄 Kembalian</span>
+                <span>Kembalian</span>
                 <span id="changeAmount">Rp 0</span>
             </div>
 
             <div class="total-actions">
                 <button class="btn-clear" onclick="clearCart()">🗑️</button>
-                <button class="btn-print" onclick="printReceipt()">🖨️ Cetak</button>
+                <button class="btn-print" onclick="printReceipt()">🖨️</button>
                 <button class="btn-save" onclick="saveData()">💾</button>
                 <button class="btn-load" onclick="loadData()">📂</button>
                 <button class="btn-history" onclick="viewHistory()">📊</button>
