@@ -15,16 +15,14 @@ const productDB = {
     "1234567890123": { name: "Coca Cola 1.5L", price: 15000 },
     "9876543210987": { name: "Pepsi 1.5L", price: 14000 },
     "1111111111111": { name: "Sprite 1.5L", price: 14000 },
-    "7777777777777": { name: "Fanta 1.5L", price: 14000 },
 };
 
 // ============================================
 // STATE
 // ============================================
 let cart = [];
-let isScanning = false;
+let scannerActive = false;
 let scanTimeout = null;
-let stream = null;
 
 // ============================================
 // DOM
@@ -72,7 +70,31 @@ function quickAdd(code) {
 renderQuickProducts();
 
 // ============================================
-// CAMERA - MENGGUNAKAN getUserImageData + ZXing
+// LOAD QUAGGA
+// ============================================
+function loadQuagga(callback) {
+    if (typeof Quagga !== 'undefined') {
+        callback();
+        return;
+    }
+
+    setStatus('⏳ Memuat scanner...', '');
+
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js';
+    script.onload = () => {
+        console.log('✅ Quagga loaded');
+        callback();
+    };
+    script.onerror = () => {
+        setStatus('❌ Gagal load scanner. Coba refresh.', 'error');
+        showResult('❌ Gagal load scanner. Coba refresh.', 'error');
+    };
+    document.head.appendChild(script);
+}
+
+// ============================================
+// CAMERA
 // ============================================
 function setStatus(msg, type = '') {
     cameraStatus.textContent = msg;
@@ -89,84 +111,109 @@ function showResult(msg, type = '') {
 }
 
 function toggleCamera() {
-    if (isScanning) {
-        stopCamera();
+    if (scannerActive) {
+        stopScanner();
     } else {
-        startCamera();
+        startScanner();
     }
 }
 
-async function startCamera() {
-    try {
-        setStatus('📷 Mengakses kamera...', '');
-
-        // Cek dukungan
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            setStatus('❌ Browser tidak support kamera', 'error');
-            showResult('❌ Browser tidak mendukung akses kamera', 'error');
-            return;
-        }
-
-        // Mulai stream
-        stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                facingMode: 'environment',
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
-            },
-            audio: false
-        });
-
-        video.srcObject = stream;
-        await video.play();
-
-        // Tampilkan video
+function startScanner() {
+    loadQuagga(() => {
+        // Reset video
+        video.style.display = 'block';
         video.classList.add('active');
         cameraPlaceholder.classList.add('hidden');
         cameraOverlay.classList.add('active');
 
-        isScanning = true;
-        btnScan.textContent = '⏹️ Berhenti';
-        btnScan.classList.add('active');
-        setStatus('📷 Kamera aktif - Arahkan ke barcode', 'active');
+        setStatus('📷 Mengakses kamera...', '');
 
-        // Mulai scan loop
-        scanLoop();
-
-        // Auto stop 15 detik
-        if (scanTimeout) clearTimeout(scanTimeout);
-        scanTimeout = setTimeout(() => {
-            if (isScanning) {
-                showResult('⏱️ Waktu habis, scan ulang', '');
-                stopCamera();
+        Quagga.init({
+            inputStream: {
+                name: "Live",
+                type: "LiveStream",
+                target: video,
+                constraints: {
+                    facingMode: "environment",
+                    width: { min: 640 },
+                    height: { min: 480 },
+                }
+            },
+            decoder: {
+                readers: [
+                    "ean_reader",
+                    "ean_8_reader",
+                    "code_128_reader",
+                    "code_39_reader",
+                    "upc_reader",
+                    "upc_e_reader"
+                ]
+            },
+            locate: true,
+            numOfWorkers: 2,
+        }, (err) => {
+            if (err) {
+                console.error('Quagga init error:', err);
+                let msg = 'Gagal akses kamera: ';
+                if (err.message && err.message.includes('Permission')) {
+                    msg += 'Izin kamera ditolak.';
+                } else {
+                    msg += err.message || 'Unknown error';
+                }
+                setStatus('❌ ' + msg, 'error');
+                showResult('❌ ' + msg, 'error');
+                stopScanner();
+                return;
             }
-        }, 15000);
 
-    } catch (err) {
-        console.error('Camera error:', err);
-        let msg = 'Gagal akses kamera: ';
-        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-            msg += 'Izin kamera ditolak. Izinkan di browser.';
-        } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-            msg += 'Tidak ada kamera ditemukan.';
-        } else {
-            msg += err.message || 'Unknown error';
-        }
-        setStatus('❌ ' + msg, 'error');
-        showResult('❌ ' + msg, 'error');
-        stopCamera();
-    }
+            Quagga.start();
+            scannerActive = true;
+            btnScan.textContent = '⏹️ Berhenti';
+            btnScan.classList.add('active');
+            setStatus('📷 Kamera aktif - Arahkan ke barcode', 'active');
+
+            // Auto-stop setelah 15 detik
+            if (scanTimeout) clearTimeout(scanTimeout);
+            scanTimeout = setTimeout(() => {
+                if (scannerActive) {
+                    showResult('⏱️ Waktu scan habis', '');
+                    stopScanner();
+                }
+            }, 15000);
+        });
+
+        Quagga.onDetected((data) => {
+            const code = data.codeResult.code;
+            if (code) {
+                console.log('✅ Barcode detected:', code);
+                barcodeInput.value = code;
+
+                const product = productDB[code];
+                if (product) {
+                    showResult(`✅ ${product.name} - Rp ${product.price.toLocaleString()}`, 'success');
+                    if (navigator.vibrate) navigator.vibrate(100);
+                } else {
+                    showResult(`⚠️ Kode "${code}" tidak ditemukan`, 'error');
+                }
+
+                stopScanner();
+                addItemByBarcode();
+            }
+        });
+    });
 }
 
-function stopCamera() {
-    isScanning = false;
-
-    if (stream) {
-        stream.getTracks().forEach(t => t.stop());
-        stream = null;
+function stopScanner() {
+    if (scannerActive) {
+        try {
+            Quagga.stop();
+        } catch (e) {
+            console.warn('Quagga stop error:', e);
+        }
+        scannerActive = false;
     }
 
-    video.srcObject = null;
+    video.style.display = 'none';
     video.classList.remove('active');
     cameraOverlay.classList.remove('active');
     cameraPlaceholder.classList.remove('hidden');
@@ -180,74 +227,6 @@ function stopCamera() {
     }
 
     setStatus('📷 Kamera dimatikan', '');
-}
-
-// ============================================
-// SCAN LOOP - Menggunakan Canvas + ZXing
-// ============================================
-function scanLoop() {
-    if (!isScanning) return;
-
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
-
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    // Dapatkan data gambar
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-    // Gunakan ZXing untuk decode
-    try {
-        const codeReader = new ZXing.BrowserMultiFormatReader();
-        const result = codeReader.decodeFromImage(imageData);
-
-        if (result && result.text) {
-            const code = result.text.trim();
-            console.log('✅ Barcode detected:', code);
-
-            barcodeInput.value = code;
-
-            // Cek produk
-            const product = productDB[code];
-            if (product) {
-                showResult(`✅ ${product.name} - Rp ${product.price.toLocaleString()}`, 'success');
-                if (navigator.vibrate) navigator.vibrate(100);
-                stopCamera();
-                addItemByBarcode();
-                return;
-            } else {
-                showResult(`⚠️ Kode "${code}" tidak ditemukan`, 'error');
-                // Lanjut scan lagi
-            }
-        }
-    } catch (e) {
-        // Tidak ada barcode, lanjut scan
-    }
-
-    // Lanjut scan lagi
-    requestAnimationFrame(scanLoop);
-}
-
-// ============================================
-// LOAD ZXING
-// ============================================
-function loadZXing(callback) {
-    if (typeof ZXing !== 'undefined') {
-        callback();
-        return;
-    }
-
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.0/umd/index.min.js';
-    script.onload = callback;
-    script.onerror = () => {
-        setStatus('❌ Gagal load library scanner', 'error');
-        showResult('❌ Gagal load scanner. Coba refresh.', 'error');
-    };
-    document.head.appendChild(script);
 }
 
 // ============================================
@@ -433,10 +412,5 @@ barcodeInput.addEventListener('keydown', (e) => {
 renderCart();
 updateTotals();
 
-// Load ZXing di background
-loadZXing(() => {
-    console.log('✅ ZXing loaded');
-    setStatus('📷 Siap scan - Klik "Mulai Kamera"', '');
-});
-
 console.log('📦 Produk:', Object.keys(productDB).length);
+console.log('📷 Klik "Mulai Kamera" untuk scan');
