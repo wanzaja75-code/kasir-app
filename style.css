@@ -578,3 +578,45 @@ header p {
         background: white;
     }
 }
+
+/* ===== DARK MODE ===== */
+body.dark {
+    background: #0f1724;
+}
+
+body.dark .card {
+    background: #1a2332;
+    color: #e2e8f0;
+}
+
+body.dark .card h2 {
+    color: #e2e8f0;
+    border-bottom-color: #2d3a4a;
+}
+
+body.dark .input-group input,
+body.dark .search-box input,
+body.dark .total-row input,
+body.dark #newBarcode,
+body.dark #newName,
+body.dark #newPrice {
+    background: #2d3a4a;
+    border-color: #3d4a5a;
+    color: #e2e8f0;
+}
+
+body.dark .cart-item {
+    background: #1a2332;
+    border-left-color: #3d6a8a;
+}
+
+body.dark .quick-products button {
+    background: #2d3a4a;
+    color: #e2e8f0;
+    border-color: #3d4a5a;
+}
+
+body.dark .camera-status {
+    background: #2d3a4a;
+    color: #f1c40f;
+}
