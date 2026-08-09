@@ -3,78 +3,74 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Scan & Kasir</title>
+    <title>Kasir Scan</title>
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-    <!-- Header -->
+    <!-- HEADER -->
     <header>
         <h1>🛒 Kasir Scan</h1>
         <p id="datetime"></p>
     </header>
 
-    <!-- Main Container -->
-    <main>
-        <!-- Bagian Scan & Input -->
-        <section class="scan-section">
-            <!-- Status Kamera -->
-            <div id="cameraStatus" class="camera-status">
-                ⚠️ Klik "Mulai Kamera" untuk mengaktifkan
-            </div>
+    <!-- SCAN SECTION -->
+    <div class="card">
+        <div id="cameraStatus" class="camera-status">📷 Klik "Mulai Kamera" untuk scan</div>
 
-            <div class="scan-box" id="scanBox">
-                <video id="scanner" autoplay playsinline muted></video>
-                <canvas id="canvas" style="display:none;"></canvas>
-                <div class="scan-overlay" id="scanOverlay">
-                    <span>📷 Arahkan ke Barcode</span>
-                    <small>Otomatis berhenti setelah 15 detik</small>
-                </div>
-                <div class="scan-placeholder" id="scanPlaceholder">
-                    <span>📷</span>
-                    <p>Klik tombol di bawah untuk mulai scan</p>
-                </div>
+        <div class="camera-container" id="cameraContainer">
+            <video id="video" autoplay playsinline muted></video>
+            <div class="camera-overlay" id="cameraOverlay">
+                <span>📷 Arahkan ke Barcode</span>
+                <small>Otomatis berhenti setelah 15 detik</small>
             </div>
-
-            <div class="input-group">
-                <button id="btnScan" onclick="toggleScanner()">📷 Mulai Kamera</button>
-                <input type="text" id="barcodeInput" placeholder="Ketik kode barang..." />
-                <button id="btnAdd" onclick="addItemByBarcode()">➕ Tambah</button>
+            <div class="camera-placeholder" id="cameraPlaceholder">
+                <span>📷</span>
+                <p>Klik tombol di bawah untuk mulai scan</p>
             </div>
+        </div>
 
-            <!-- Info produk yang di-scan -->
-            <div id="scanResult" class="scan-result"></div>
-        </section>
+        <div class="input-group">
+            <button id="btnScan" class="btn-scan" onclick="toggleCamera()">📷 Mulai Kamera</button>
+            <input type="text" id="barcodeInput" placeholder="Ketik kode barang..." autofocus />
+            <button class="btn-add" onclick="addItemByBarcode()">➕ Tambah</button>
+        </div>
 
-        <!-- Daftar Belanjaan -->
-        <section class="cart-section">
-            <h2>🧾 Daftar Belanjaan</h2>
-            <div id="cartList"></div>
-            <div class="total-section">
-                <div class="total-row">
-                    <span>Subtotal:</span>
-                    <span id="subtotal">Rp 0</span>
-                </div>
-                <div class="total-row">
-                    <span>Diskon (%):</span>
-                    <input type="number" id="discountInput" value="0" min="0" max="100" />
-                    <span>%</span>
-                </div>
-                <div class="total-row">
-                    <span>Potongan:</span>
-                    <span id="discountAmount">Rp 0</span>
-                </div>
-                <div class="total-row grand-total">
-                    <span>Total:</span>
-                    <span id="grandTotal">Rp 0</span>
-                </div>
-                <div class="total-actions">
-                    <button id="btnClear" onclick="clearCart()">🗑️ Kosongkan</button>
-                    <button id="btnPrint" onclick="printReceipt()">🖨️ Cetak</button>
-                </div>
+        <div id="scanResult" class="scan-result"></div>
+
+        <!-- Quick Products -->
+        <div class="quick-products" id="quickProducts"></div>
+    </div>
+
+    <!-- CART SECTION -->
+    <div class="card">
+        <h2>🧾 Daftar Belanjaan</h2>
+        <div id="cartList"><div class="empty-cart">🛒 Belum ada barang</div></div>
+
+        <div class="total-section">
+            <div class="total-row">
+                <span>Subtotal:</span>
+                <span id="subtotal">Rp 0</span>
             </div>
-        </section>
-    </main>
+            <div class="total-row">
+                <span>Diskon (%):</span>
+                <input type="number" id="discountInput" value="0" min="0" max="100" />
+                <span>%</span>
+            </div>
+            <div class="total-row">
+                <span>Potongan:</span>
+                <span id="discountAmount">Rp 0</span>
+            </div>
+            <div class="total-row grand-total">
+                <span>Total:</span>
+                <span id="grandTotal">Rp 0</span>
+            </div>
+            <div class="total-actions">
+                <button class="btn-clear" onclick="clearCart()">🗑️ Kosongkan</button>
+                <button class="btn-print" onclick="printReceipt()">🖨️ Cetak</button>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
