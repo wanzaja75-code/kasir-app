@@ -485,6 +485,7 @@ header p {
     display: flex;
     gap: 8px;
     margin-top: 10px;
+    flex-wrap: wrap;
 }
 
 .total-actions button {
@@ -496,6 +497,7 @@ header p {
     cursor: pointer;
     transition: 0.2s;
     font-size: 14px;
+    min-width: 80px;
 }
 
 .btn-clear {
@@ -512,6 +514,30 @@ header p {
 }
 .btn-print:hover {
     background: #21809e;
+}
+
+.btn-save {
+    background: #6c757d;
+    color: white;
+}
+.btn-save:hover {
+    background: #5a6268;
+}
+
+.btn-load {
+    background: #17a2b8;
+    color: white;
+}
+.btn-load:hover {
+    background: #138496;
+}
+
+.btn-history {
+    background: #6f42c1;
+    color: white;
+}
+.btn-history:hover {
+    background: #5a32a3;
 }
 
 /* ===== RESPONSIVE ===== */
@@ -531,6 +557,11 @@ header p {
     .method-tabs .tab {
         padding: 6px 12px;
         font-size: 12px;
+    }
+    .total-actions button {
+        font-size: 12px;
+        padding: 8px;
+        min-width: 60px;
     }
 }
 
