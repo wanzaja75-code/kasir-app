@@ -16,27 +16,49 @@
 
     <!-- SCAN SECTION -->
     <div class="card">
-        <div id="cameraStatus" class="camera-status">📷 Klik "Mulai Kamera" untuk scan</div>
+        <div id="cameraStatus" class="camera-status">📷 Pilih metode scan di bawah</div>
 
-        <div class="camera-container" id="cameraContainer">
-            <video id="video" autoplay playsinline muted></video>
-            <div class="camera-overlay" id="cameraOverlay">
-                <span>📷 Arahkan ke Barcode</span>
-                <small>Otomatis berhenti setelah 15 detik</small>
-            </div>
-            <div class="camera-placeholder" id="cameraPlaceholder">
-                <span>📷</span>
-                <p>Klik tombol di bawah untuk mulai scan</p>
+        <!-- Pilihan Metode -->
+        <div class="method-tabs">
+            <button class="tab active" onclick="switchMethod('manual')">⌨️ Manual</button>
+            <button class="tab" onclick="switchMethod('upload')">📷 Upload Foto</button>
+            <button class="tab" onclick="switchMethod('camera')">📹 Kamera</button>
+        </div>
+
+        <!-- Manual Input -->
+        <div id="methodManual" class="method-content active">
+            <div class="input-group">
+                <input type="text" id="barcodeInput" placeholder="Ketik kode barang..." autofocus />
+                <button class="btn-add" onclick="addItemByBarcode()">➕ Tambah</button>
             </div>
         </div>
 
-        <div class="input-group">
+        <!-- Upload Foto -->
+        <div id="methodUpload" class="method-content">
+            <div class="upload-area" id="uploadArea">
+                <span>📸</span>
+                <p>Klik atau tap untuk upload foto barcode</p>
+                <small>Support: PNG, JPG, WebP</small>
+                <input type="file" id="fileInput" accept="image/*" capture="environment" />
+            </div>
+            <div id="uploadResult" class="scan-result"></div>
+        </div>
+
+        <!-- Camera Live -->
+        <div id="methodCamera" class="method-content">
+            <div class="camera-container" id="cameraContainer">
+                <video id="video" autoplay playsinline muted></video>
+                <div class="camera-overlay" id="cameraOverlay">
+                    <span>📷 Arahkan ke Barcode</span>
+                    <small>Otomatis berhenti setelah 15 detik</small>
+                </div>
+                <div class="camera-placeholder" id="cameraPlaceholder">
+                    <span>📷</span>
+                    <p>Klik tombol di bawah untuk mulai scan</p>
+                </div>
+            </div>
             <button id="btnScan" class="btn-scan" onclick="toggleCamera()">📷 Mulai Kamera</button>
-            <input type="text" id="barcodeInput" placeholder="Ketik kode barang..." autofocus />
-            <button class="btn-add" onclick="addItemByBarcode()">➕ Tambah</button>
         </div>
-
-        <div id="scanResult" class="scan-result"></div>
 
         <!-- Quick Products -->
         <div class="quick-products" id="quickProducts"></div>
@@ -71,6 +93,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Library untuk scan dari gambar -->
+    <script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js"></script>
 
     <script src="script.js"></script>
 </body>
