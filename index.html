@@ -62,6 +62,17 @@
 
         <!-- Quick Products -->
         <div class="quick-products" id="quickProducts"></div>
+
+        <!-- Tambah Produk Baru -->
+        <div class="add-product" style="margin-top: 12px; border-top: 2px solid #eef2f6; padding-top: 12px;">
+            <h4 style="font-size: 14px; color: #0a2e4a; margin-bottom: 8px;">➕ Tambah Produk Baru</h4>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <input type="text" id="newBarcode" placeholder="Kode Barcode" style="flex:1; padding:8px 12px; border:2px solid #dce3ec; border-radius:8px; font-size:14px; min-width:100px;" />
+                <input type="text" id="newName" placeholder="Nama Produk" style="flex:1; padding:8px 12px; border:2px solid #dce3ec; border-radius:8px; font-size:14px; min-width:100px;" />
+                <input type="number" id="newPrice" placeholder="Harga" style="flex:0 0 100px; padding:8px 12px; border:2px solid #dce3ec; border-radius:8px; font-size:14px;" />
+                <button onclick="addNewProduct()" style="padding:8px 16px; background:#28a745; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer;">➕ Tambah</button>
+            </div>
+        </div>
     </div>
 
     <!-- CART SECTION -->
@@ -90,6 +101,9 @@
             <div class="total-actions">
                 <button class="btn-clear" onclick="clearCart()">🗑️ Kosongkan</button>
                 <button class="btn-print" onclick="printReceipt()">🖨️ Cetak</button>
+                <button class="btn-save" onclick="saveData()" style="flex:1; padding:10px; background:#6c757d; color:white; border:none; border-radius:10px; font-weight:600; cursor:pointer;">💾 Simpan</button>
+                <button class="btn-load" onclick="loadData()" style="flex:1; padding:10px; background:#17a2b8; color:white; border:none; border-radius:10px; font-weight:600; cursor:pointer;">📂 Load</button>
+                <button class="btn-history" onclick="viewHistory()" style="flex:1; padding:10px; background:#6f42c1; color:white; border:none; border-radius:10px; font-weight:600; cursor:pointer;">📊 Riwayat</button>
             </div>
         </div>
     </div>
