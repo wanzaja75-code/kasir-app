@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Scan & Kasir</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="manifest" href="manifest.json" />
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <h1>🛒 Kasir Scan</h1>
+        <p id="datetime"></p>
+    </header>
+
+    <!-- Main Container -->
+    <main>
+        <!-- Bagian Scan & Input -->
+        <section class="scan-section">
+            <div class="scan-box">
+                <video id="scanner" autoplay playsinline></video>
+                <canvas id="canvas" style="display:none;"></canvas>
+                <div class="scan-overlay">
+                    <span>📷 Arahkan ke Barcode</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="barcodeInput" placeholder="Ketik kode barang..." />
+                <button id="btnScan" onclick="startScanner()">📷 Scan</button>
+                <button id="btnAdd" onclick="addItemByBarcode()">➕ Tambah</button>
+            </div>
+        </section>
+
+        <!-- Daftar Belanjaan -->
+        <section class="cart-section">
+            <h2>🧾 Daftar Belanjaan</h2>
+            <div id="cartList"></div>
+            <div class="total-section">
+                <div class="total-row">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">Rp 0</span>
+                </div>
+                <div class="total-row">
+                    <span>Diskon (%):</span>
+                    <input type="number" id="discountInput" value="0" min="0" max="100" />
+                    <span>%</span>
+                </div>
+                <div class="total-row">
+                    <span>Potongan:</span>
+                    <span id="discountAmount">Rp 0</span>
+                </div>
+                <div class="total-row grand-total">
+                    <span>Total:</span>
+                    <span id="grandTotal">Rp 0</span>
+                </div>
+                <button id="btnClear" onclick="clearCart()">🗑️ Kosongkan</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
