@@ -2,20 +2,10 @@
 // DATABASE PRODUK
 // ============================================
 const productDB = {
-    "8991234567890": { name: "Indomie Goreng", price: 3500 },
-    "8991234567891": { name: "Indomie Kuah", price: 3500 },
-    "8991234567892": { name: "Teh Pucuk 350ml", price: 4500 },
-    "8991234567893": { name: "Aqua 600ml", price: 3000 },
-    "8991234567894": { name: "Roti Tawar", price: 12000 },
-    "8991234567895": { name: "Mie Sedap Goreng", price: 3200 },
-    "8991234567896": { name: "Mie Sedap Kuah", price: 3200 },
-    "8991234567897": { name: "Chitato 68g", price: 8500 },
-    "8991234567898": { name: "Pocky Strawberry", price: 9500 },
-    "8991234567899": { name: "Pocky Chocolate", price: 9500 },
-    "1234567890123": { name: "Coca Cola 1.5L", price: 15000 },
-    "9876543210987": { name: "Pepsi 1.5L", price: 14000 },
-    "1111111111111": { name: "Sprite 1.5L", price: 14000 },
-    "7777777777777": { name: "Fanta 1.5L", price: 14000 },
+    "8991234567890": { name: "Indomie Goreng", price: 3500, category: "Makanan" },
+    "8991234567892": { name: "Teh Pucuk 350ml", price: 4500, category: "Minuman" },
+    "8991234567897": { name: "Chitato 68g", price: 8500, category: "Snack" },
+    // Tambah category di semua produk
 };
 
 // ============================================
@@ -603,3 +593,120 @@ loadData();
 console.log('📦 Produk:', Object.keys(productDB).length);
 console.log('📷 Pilih metode: Manual | Upload Foto | Kamera');
 console.log('📊 Riwayat transaksi:', history.length);
+
+// ============================================
+// EXPORT EXCEL
+// ============================================
+function exportExcel() {
+    if (history.length === 0) {
+        alert('📭 Belum ada data transaksi!');
+        return;
+    }
+
+    // Buat data CSV
+    let csv = 'No,Tanggal,Item,Total\n';
+    history.forEach((t, i) => {
+        const date = new Date(t.date).toLocaleString('id-ID');
+        t.items.forEach(item => {
+            csv += `${i+1},${date},${item.name} x${item.qty},Rp ${(item.price * item.qty).toLocaleString()}\n`;
+        });
+    });
+
+    // Download
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Laporan_Transaksi_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// ============================================
+// FILTER KATEGORI
+// ============================================
+let currentCategory = 'all';
+
+function filterCategory(category) {
+    currentCategory = category;
+    
+    // Update tombol aktif
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.style.background = 'transparent';
+        btn.style.color = '#1e293b';
+    });
+    event.target.style.background = '#1a6d8a';
+    event.target.style.color = 'white';
+    
+    renderQuickProducts(category);
+}
+
+function renderQuickProducts(category = 'all') {
+    let entries = Object.entries(productDB);
+    if (category !== 'all') {
+        entries = entries.filter(([code, p]) => p.category === category);
+    }
+    entries = entries.slice(0, 8);
+    quickProducts.innerHTML = entries.map(([code, p]) =>
+        `<button onclick="quickAdd('${code}')">${p.name}</button>`
+    ).join('');
+}
+
+// ============================================
+// PEMBAYARAN & KEMBALIAN
+// ============================================
+document.getElementById('paymentInput')?.addEventListener('input', function() {
+    const total = parseInt(grandTotalEl.textContent.replace(/[^0-9]/g, '')) || 0;
+    const payment = parseInt(this.value) || 0;
+    const change = payment - total;
+    document.getElementById('changeAmount').textContent = change >= 0 ? `Rp ${change.toLocaleString()}` : '❌ Kurang';
+    document.getElementById('changeAmount').style.color = change >= 0 ? '#28a745' : '#dc3545';
+});
+
+// Update di function updateTotals():
+function updateTotals() {
+    // ... kode existing ...
+    
+    // Trigger ulang payment
+    const paymentInput = document.getElementById('paymentInput');
+    if (paymentInput) {
+        const event = new Event('input');
+        paymentInput.dispatchEvent(event);
+    }
+}
+
+// ============================================
+// SEARCH PRODUK
+// ============================================
+function searchProduct() {
+    const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+    if (!keyword) {
+        renderQuickProducts(currentCategory || 'all');
+        return;
+    }
+    
+    const entries = Object.entries(productDB).filter(([code, p]) => 
+        p.name.toLowerCase().includes(keyword) || code.includes(keyword)
+    );
+    
+    quickProducts.innerHTML = entries.slice(0, 10).map(([code, p]) =>
+        `<button onclick="quickAdd('${code}')">${p.name}</button>`
+    ).join('');
+}
+
+// ============================================
+// DARK MODE
+// ============================================
+function toggleTheme() {
+    document.body.classList.toggle('dark');
+    const btn = event.target;
+    btn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+    
+    // Simpan preferensi
+    localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+}
+
+// Load theme saat startup
+if (localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark');
+            }
