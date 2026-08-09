@@ -25,6 +25,7 @@ let cart = [];
 let scannerActive = false;
 let scanTimeout = null;
 let stream = null;
+let history = JSON.parse(localStorage.getItem('kasirHistory') || '[]');
 
 // ============================================
 // DOM
@@ -35,7 +36,6 @@ const cameraOverlay = document.getElementById('cameraOverlay');
 const cameraPlaceholder = document.getElementById('cameraPlaceholder');
 const btnScan = document.getElementById('btnScan');
 const barcodeInput = document.getElementById('barcodeInput');
-const scanResult = document.getElementById('uploadResult');
 const cartList = document.getElementById('cartList');
 const subtotalEl = document.getElementById('subtotal');
 const discountInput = document.getElementById('discountInput');
@@ -43,7 +43,6 @@ const discountAmountEl = document.getElementById('discountAmount');
 const grandTotalEl = document.getElementById('grandTotal');
 const quickProducts = document.getElementById('quickProducts');
 const fileInput = document.getElementById('fileInput');
-const uploadArea = document.getElementById('uploadArea');
 
 // ============================================
 // DATE TIME
@@ -77,15 +76,12 @@ renderQuickProducts();
 // SWITCH METHOD
 // ============================================
 function switchMethod(method) {
-    // Update tabs
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelector(`.tab[onclick="switchMethod('${method}')"]`).classList.add('active');
 
-    // Update content
     document.querySelectorAll('.method-content').forEach(c => c.classList.remove('active'));
     document.getElementById(`method${method.charAt(0).toUpperCase() + method.slice(1)}`).classList.add('active');
 
-    // Stop camera jika switch
     if (method !== 'camera' && scannerActive) {
         stopCamera();
     }
@@ -104,7 +100,6 @@ fileInput.addEventListener('change', function(e) {
     reader.onload = function(event) {
         const img = new Image();
         img.onload = function() {
-            // Scan barcode dari gambar
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             canvas.width = img.width;
@@ -113,7 +108,6 @@ fileInput.addEventListener('change', function(e) {
 
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-            // Gunakan jsQR untuk scan
             try {
                 const code = jsQR(imageData.data, imageData.width, imageData.height, {
                     inversionAttempts: "dontInvert",
@@ -137,7 +131,7 @@ fileInput.addEventListener('change', function(e) {
         img.src = event.target.result;
     };
     reader.readAsDataURL(file);
-    this.value = ''; // Reset agar bisa upload ulang
+    this.value = '';
 });
 
 function showUploadResult(msg, type = '') {
@@ -150,12 +144,22 @@ function showUploadResult(msg, type = '') {
 }
 
 // ============================================
-// CAMERA - Menggunakan navigator.mediaDevices + jsQR
+// CAMERA
 // ============================================
 function setStatus(msg, type = '') {
     cameraStatus.textContent = msg;
     cameraStatus.className = 'camera-status';
     if (type) cameraStatus.classList.add(type);
+}
+
+function showResult(msg, type = '') {
+    const el = document.getElementById('uploadResult') || document.getElementById('scanResult');
+    if (!el) return;
+    el.textContent = msg;
+    el.className = 'scan-result show';
+    if (type) el.classList.add(type);
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 3000);
 }
 
 function toggleCamera() {
@@ -196,7 +200,6 @@ async function startCamera() {
         btnScan.classList.add('active');
         setStatus('📷 Kamera aktif - Arahkan ke barcode', 'active');
 
-        // Start scan loop
         scanLoop();
 
         if (scanTimeout) clearTimeout(scanTimeout);
@@ -246,9 +249,6 @@ function stopCamera() {
     setStatus('📷 Kamera dimatikan', '');
 }
 
-// ============================================
-// SCAN LOOP - Menggunakan Canvas + jsQR
-// ============================================
 function scanLoop() {
     if (!scannerActive) return;
 
@@ -285,11 +285,40 @@ function scanLoop() {
             addItemByBarcode();
             return;
         }
-    } catch (e) {
-        // Tidak ada barcode, lanjut scan
-    }
+    } catch (e) {}
 
     requestAnimationFrame(scanLoop);
+}
+
+// ============================================
+// TAMBAH PRODUK BARU
+// ============================================
+function addNewProduct() {
+    const code = document.getElementById('newBarcode').value.trim();
+    const name = document.getElementById('newName').value.trim();
+    const price = parseInt(document.getElementById('newPrice').value);
+
+    if (!code || !name || isNaN(price) || price <= 0) {
+        showResult('⚠️ Isi semua data dengan benar!', 'error');
+        return;
+    }
+
+    if (productDB[code]) {
+        showResult(`⚠️ Kode "${code}" sudah ada!`, 'error');
+        return;
+    }
+
+    productDB[code] = { name, price };
+    showResult(`✅ "${name}" berhasil ditambahkan!`, 'success');
+
+    document.getElementById('newBarcode').value = '';
+    document.getElementById('newName').value = '';
+    document.getElementById('newPrice').value = '';
+
+    renderQuickProducts();
+    saveData();
+
+    console.log('📦 Produk baru:', code, name, price);
 }
 
 // ============================================
@@ -327,24 +356,16 @@ function addItemByBarcode() {
     barcodeInput.focus();
     renderCart();
     updateTotals();
+    saveData();
 
     showResult(`✅ ${product.name} ditambahkan!`, 'success');
-}
-
-function showResult(msg, type = '') {
-    const el = document.getElementById('scanResult') || document.getElementById('uploadResult');
-    if (!el) return;
-    el.textContent = msg;
-    el.className = 'scan-result show';
-    if (type) el.classList.add(type);
-    el.style.display = 'block';
-    setTimeout(() => { el.style.display = 'none'; }, 3000);
 }
 
 function removeItem(id) {
     cart = cart.filter(item => item.id !== id);
     renderCart();
     updateTotals();
+    saveData();
 }
 
 function changeQty(id, delta) {
@@ -358,6 +379,7 @@ function changeQty(id, delta) {
     item.qty = newQty;
     renderCart();
     updateTotals();
+    saveData();
 }
 
 function clearCart() {
@@ -366,6 +388,7 @@ function clearCart() {
         cart = [];
         renderCart();
         updateTotals();
+        saveData();
     }
 }
 
@@ -411,6 +434,94 @@ function updateTotals() {
 discountInput.addEventListener('input', updateTotals);
 
 // ============================================
+// SAVE & LOAD DATA
+// ============================================
+function saveData() {
+    const data = {
+        cart: cart,
+        products: productDB,
+        timestamp: new Date().toISOString()
+    };
+    localStorage.setItem('kasirData', JSON.stringify(data));
+    console.log('💾 Data tersimpan');
+}
+
+function loadData() {
+    const saved = localStorage.getItem('kasirData');
+    if (!saved) {
+        showResult('📭 Tidak ada data tersimpan', '');
+        return;
+    }
+
+    try {
+        const data = JSON.parse(saved);
+        if (data.cart) {
+            cart = data.cart;
+            renderCart();
+            updateTotals();
+        }
+        if (data.products) {
+            Object.assign(productDB, data.products);
+            renderQuickProducts();
+        }
+        showResult('📂 Data berhasil dimuat!', 'success');
+        console.log('📂 Data dimuat:', new Date(data.timestamp).toLocaleString());
+    } catch (e) {
+        console.error('Gagal load data:', e);
+        showResult('❌ Gagal memuat data', 'error');
+    }
+}
+
+// ============================================
+// RIWAYAT TRANSAKSI
+// ============================================
+function saveTransaction() {
+    if (cart.length === 0) return;
+
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    const discountPercent = parseFloat(discountInput.value) || 0;
+    const discountAmount = (subtotal * discountPercent) / 100;
+    const grandTotal = subtotal - discountAmount;
+
+    const transaction = {
+        id: Date.now(),
+        date: new Date().toISOString(),
+        items: JSON.parse(JSON.stringify(cart)),
+        subtotal: subtotal,
+        discount: discountPercent,
+        discountAmount: discountAmount,
+        total: grandTotal
+    };
+
+    history.push(transaction);
+    localStorage.setItem('kasirHistory', JSON.stringify(history));
+
+    console.log('📊 Transaksi tersimpan:', transaction);
+}
+
+function viewHistory() {
+    if (history.length === 0) {
+        alert('📭 Belum ada riwayat transaksi');
+        return;
+    }
+
+    let msg = '📊 RIWAYAT TRANSAKSI\n';
+    msg += '='.repeat(40) + '\n\n';
+
+    history.slice(-10).reverse().forEach((t, i) => {
+        const date = new Date(t.date).toLocaleString('id-ID');
+        msg += `${i+1}. ${date}\n`;
+        msg += `   Total: Rp ${Math.round(t.total).toLocaleString()}\n`;
+        msg += `   Items: ${t.items.length}\n\n`;
+    });
+
+    msg += '='.repeat(40) + '\n';
+    msg += `Total Transaksi: ${history.length}`;
+
+    alert(msg);
+}
+
+// ============================================
 // PRINT
 // ============================================
 function printReceipt() {
@@ -418,6 +529,9 @@ function printReceipt() {
         alert('Belum ada barang!');
         return;
     }
+
+    // Simpan transaksi sebelum print
+    saveTransaction();
 
     const now = new Date();
     const dateStr = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -484,38 +598,8 @@ barcodeInput.addEventListener('keydown', (e) => {
 // ============================================
 renderCart();
 updateTotals();
+loadData();
 
 console.log('📦 Produk:', Object.keys(productDB).length);
 console.log('📷 Pilih metode: Manual | Upload Foto | Kamera');
-
-// ============================================
-// TAMBAH PRODUK BARU
-// ============================================
-function addNewProduct() {
-    const code = document.getElementById('newBarcode').value.trim();
-    const name = document.getElementById('newName').value.trim();
-    const price = parseInt(document.getElementById('newPrice').value);
-
-    if (!code || !name || isNaN(price) || price <= 0) {
-        showResult('⚠️ Isi semua data dengan benar!', 'error');
-        return;
-    }
-
-    if (productDB[code]) {
-        showResult(`⚠️ Kode "${code}" sudah ada!`, 'error');
-        return;
-    }
-
-    productDB[code] = { name, price };
-    showResult(`✅ "${name}" berhasil ditambahkan!`, 'success');
-
-    // Reset input
-    document.getElementById('newBarcode').value = '';
-    document.getElementById('newName').value = '';
-    document.getElementById('newPrice').value = '';
-
-    // Refresh quick products
-    renderQuickProducts();
-
-    console.log('📦 Produk baru:', code, name, price);
-}
+console.log('📊 Riwayat transaksi:', history.length);
