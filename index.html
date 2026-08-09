@@ -8,6 +8,9 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Font Awesome 6 (Gratis) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/cdn.min.js"></script>
     
@@ -46,11 +49,13 @@
     <!-- HEADER -->
     <header class="relative bg-gradient-to-r from-[#0f2a44] to-[#1a5f7a] text-white rounded-2xl p-5 mb-4 shadow-xl shadow-[#0f2a44]/20">
         <button @click="toggleTheme()" 
-                class="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-200 flex items-center justify-center text-lg">
-            <span x-text="darkMode ? '☀️' : '🌙'"></span>
+                class="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-200 flex items-center justify-center">
+            <i class="fas" :class="darkMode ? 'fa-sun' : 'fa-moon'"></i>
         </button>
         <div class="text-center">
-            <h1 class="text-2xl font-bold tracking-tight">🛒 Kasir Scan</h1>
+            <h1 class="text-2xl font-bold tracking-tight">
+                <i class="fas fa-cash-register mr-2"></i> Kasir Scan
+            </h1>
             <p class="text-sm opacity-80 mt-1" x-text="datetime"></p>
         </div>
     </header>
@@ -66,7 +71,12 @@
                 'bg-red-50 dark:bg-red-950/30 border-l-4 border-red-500': status.type === 'error',
                 'bg-blue-50 dark:bg-blue-950/30 border-l-4 border-blue-500': status.type === 'active'
              }">
-            <span class="text-lg" x-text="status.icon || '📷'"></span>
+            <i class="fas text-lg" :class="{
+                'fa-info-circle': status.type === 'info',
+                'fa-check-circle': status.type === 'success',
+                'fa-exclamation-circle': status.type === 'error',
+                'fa-camera': status.type === 'active'
+            }"></i>
             <span class="text-sm font-medium dark:text-gray-200" x-text="status.message"></span>
         </div>
 
@@ -78,7 +88,8 @@
                         :class="activeMethod === method.id ? 
                                 'bg-white dark:bg-[#1a2835] text-gray-900 dark:text-white shadow-md' : 
                                 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'">
-                    <span x-text="method.icon + ' ' + method.label"></span>
+                    <i class="fas" :class="method.icon"></i>
+                    <span class="ml-1.5" x-text="method.label"></span>
                 </button>
             </template>
         </div>
@@ -94,8 +105,8 @@
                            @keydown.enter="addItem()"
                            class="flex-1 min-w-[120px] px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 dark:bg-[#1a2835] dark:text-white focus:border-[#1a5f7a] focus:ring-4 focus:ring-[#1a5f7a]/10 outline-none transition-all duration-200 text-sm">
                     <button @click="addItem()"
-                            class="px-6 py-3 bg-[#1a5f7a] hover:bg-[#154c62] text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-[#1a5f7a]/25 text-sm whitespace-nowrap">
-                        ➕ Tambah
+                            class="px-6 py-3 bg-[#1a5f7a] hover:bg-[#154c62] text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-[#1a5f7a]/25 text-sm whitespace-nowrap flex items-center gap-2">
+                        <i class="fas fa-plus"></i> Tambah
                     </button>
                 </div>
             </div>
@@ -103,7 +114,7 @@
             <!-- Upload Foto -->
             <div x-show="activeMethod === 'upload'" x-transition.duration.200>
                 <div class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-8 text-center cursor-pointer hover:border-[#1a5f7a] dark:hover:border-[#4a8aaa] transition-all duration-300 bg-gray-50/50 dark:bg-[#0f1a24]/50 hover:bg-gray-100/50 dark:hover:bg-[#1a2835]/50 relative">
-                    <span class="text-5xl block mb-2">📸</span>
+                    <i class="fas fa-image text-5xl block mb-2 text-gray-400 dark:text-gray-600"></i>
                     <p class="text-gray-600 dark:text-gray-400 font-medium">Klik untuk upload foto barcode</p>
                     <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">PNG, JPG, WebP</p>
                     <input type="file" id="fileInput" accept="image/*" capture="environment" 
@@ -125,39 +136,45 @@
                     <video id="video" autoplay playsinline muted class="w-full h-full object-cover hidden" :class="{'!block': cameraActive}"></video>
                     <div class="absolute inset-0 flex items-center justify-center flex-col text-white/80 pointer-events-none border-2 border-white/30 rounded-xl transition-all duration-300"
                          :class="{'!flex': cameraActive, 'hidden': !cameraActive}">
-                        <span class="text-lg">📷 Arahkan ke Barcode</span>
+                        <i class="fas fa-camera text-2xl mb-2"></i>
+                        <span class="text-lg">Arahkan ke Barcode</span>
                         <span class="text-xs opacity-60 mt-1">Otomatis berhenti 15 detik</span>
                     </div>
                     <div class="absolute inset-0 flex flex-col items-center justify-center text-white/30 bg-[#0f1724] rounded-xl"
                          :class="{'hidden': cameraActive}">
-                        <span class="text-5xl mb-1">📷</span>
+                        <i class="fas fa-camera text-5xl mb-2"></i>
                         <p class="text-sm">Klik tombol di bawah</p>
                     </div>
                 </div>
                 <button @click="toggleCamera()"
-                        class="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-200"
+                        class="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2"
                         :class="cameraActive ? 
                                 'bg-red-500 hover:bg-red-600 text-white' : 
                                 'bg-[#0f2a44] hover:bg-[#1a3d5c] text-white'">
-                    <span x-text="cameraActive ? '⏹️ Berhenti' : '📷 Mulai Kamera'"></span>
+                    <i class="fas" :class="cameraActive ? 'fa-stop' : 'fa-camera'"></i>
+                    <span x-text="cameraActive ? 'Berhenti' : 'Mulai Kamera'"></span>
                 </button>
             </div>
         </div>
 
         <!-- Search & Filter -->
         <div class="mt-4 space-y-2">
-            <input type="text" x-model="searchQuery" @input="searchProduct()"
-                   placeholder="🔍 Cari produk..." 
-                   class="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 dark:bg-[#1a2835] dark:text-white focus:border-[#1a5f7a] focus:ring-4 focus:ring-[#1a5f7a]/10 outline-none transition-all duration-200 text-sm">
+            <div class="relative">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm"></i>
+                <input type="text" x-model="searchQuery" @input="searchProduct()"
+                       placeholder="Cari produk..." 
+                       class="w-full pl-9 pr-4 py-2.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 dark:bg-[#1a2835] dark:text-white focus:border-[#1a5f7a] focus:ring-4 focus:ring-[#1a5f7a]/10 outline-none transition-all duration-200 text-sm">
+            </div>
             
             <div class="flex gap-1.5 flex-wrap">
                 <template x-for="cat in categories" :key="cat.id">
                     <button @click="filterCategory(cat.id)"
-                            class="px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200"
+                            class="px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 flex items-center gap-1"
                             :class="activeCategory === cat.id ? 
                                     'bg-[#1a5f7a] text-white shadow-md' : 
                                     'border-2 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-[#1a5f7a] dark:hover:border-[#4a8aaa]'">
-                        <span x-text="cat.icon + ' ' + cat.label"></span>
+                        <i class="fas" :class="cat.icon"></i>
+                        <span x-text="cat.label"></span>
                     </button>
                 </template>
             </div>
@@ -175,7 +192,9 @@
 
         <!-- Add Product -->
         <div class="mt-4 pt-4 border-t-2 border-gray-100 dark:border-gray-800">
-            <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">➕ Tambah Produk</h4>
+            <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <i class="fas fa-plus-circle text-emerald-500 mr-1.5"></i> Tambah Produk
+            </h4>
             <div class="flex gap-1.5 flex-wrap">
                 <input type="text" x-model="newProduct.barcode" placeholder="Kode" class="flex-1 min-w-[60px] px-3 py-2 rounded-lg border-2 border-gray-200 dark:border-gray-700 dark:bg-[#1a2835] dark:text-white text-sm focus:border-[#1a5f7a] outline-none transition-all">
                 <input type="text" x-model="newProduct.name" placeholder="Nama" class="flex-1 min-w-[60px] px-3 py-2 rounded-lg border-2 border-gray-200 dark:border-gray-700 dark:bg-[#1a2835] dark:text-white text-sm focus:border-[#1a5f7a] outline-none transition-all">
@@ -187,19 +206,26 @@
                     <option value="Lainnya">📦 Lainnya</option>
                 </select>
                 <input type="number" x-model="newProduct.price" placeholder="Harga" class="w-20 px-3 py-2 rounded-lg border-2 border-gray-200 dark:border-gray-700 dark:bg-[#1a2835] dark:text-white text-sm focus:border-[#1a5f7a] outline-none transition-all">
-                <button @click="addNewProduct()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg transition-all duration-200 text-sm">+</button>
+                <button @click="addNewProduct()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg transition-all duration-200 text-sm">
+                    <i class="fas fa-plus"></i>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- ===== CART SECTION (FIX) ===== -->
+    <!-- ===== CART SECTION ===== -->
     <div class="bg-white dark:bg-[#15202b] rounded-2xl p-4 md:p-5 shadow-sm transition-all duration-300 card-hover">
-        <h2 class="text-base font-semibold text-gray-800 dark:text-gray-200 mb-3 pb-2 border-b-2 border-gray-100 dark:border-gray-800">🧾 Daftar Belanjaan</h2>
+        <h2 class="text-base font-semibold text-gray-800 dark:text-gray-200 mb-3 pb-2 border-b-2 border-gray-100 dark:border-gray-800">
+            <i class="fas fa-shopping-cart text-[#1a5f7a] dark:text-[#5a9ab8] mr-2"></i> Daftar Belanjaan
+        </h2>
         
         <!-- Cart Items -->
         <div class="max-h-64 overflow-y-auto mb-3 space-y-1" id="cartList">
             <template x-if="cart.length === 0">
-                <div class="text-center text-gray-400 dark:text-gray-600 py-6 text-sm">🛒 Belum ada barang</div>
+                <div class="text-center text-gray-400 dark:text-gray-600 py-6 text-sm">
+                    <i class="fas fa-box-open text-2xl block mb-2"></i>
+                    Belum ada barang
+                </div>
             </template>
             <template x-for="(item, idx) in cart" :key="item.id">
                 <div class="flex items-center justify-between gap-1.5 p-2.5 bg-gray-50 dark:bg-[#1a2835] rounded-xl border-l-4 border-[#1a5f7a] transition-all duration-200 hover:bg-gray-100 dark:hover:bg-[#1f3040] fade-in">
@@ -211,22 +237,28 @@
                         <button @click="changeQty(item.id, 1)" class="w-6 h-6 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 font-bold text-sm transition-all flex items-center justify-center">+</button>
                     </div>
                     <span class="font-bold text-sm text-gray-800 dark:text-gray-200 min-w-[50px] text-right" x-text="'Rp ' + formatNumber(item.price * item.qty)"></span>
-                    <button @click="removeItem(item.id)" class="text-red-500 hover:text-red-700 text-sm font-bold px-1 transition-all">✕</button>
+                    <button @click="removeItem(item.id)" class="text-red-500 hover:text-red-700 text-sm font-bold px-1 transition-all">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
             </template>
         </div>
 
-        <!-- ===== TOTAL SECTION (FIX - Lebih Rapi) ===== -->
+        <!-- ===== TOTAL SECTION ===== -->
         <div class="space-y-2 pt-3 border-t-2 border-gray-100 dark:border-gray-800">
             
-            <!-- Subtotal & Diskon dalam 1 baris -->
+            <!-- Subtotal & Diskon -->
             <div class="grid grid-cols-2 gap-3">
                 <div class="flex justify-between items-center px-3 py-2 bg-gray-50 dark:bg-[#1a2835] rounded-xl">
-                    <span class="text-sm text-gray-600 dark:text-gray-400">Subtotal</span>
+                    <span class="text-sm text-gray-600 dark:text-gray-400">
+                        <i class="fas fa-receipt mr-1.5 text-gray-400"></i> Subtotal
+                    </span>
                     <span class="font-semibold text-sm text-gray-800 dark:text-gray-200" x-text="'Rp ' + formatNumber(subtotal)"></span>
                 </div>
                 <div class="flex justify-between items-center px-3 py-2 bg-gray-50 dark:bg-[#1a2835] rounded-xl">
-                    <span class="text-sm text-gray-600 dark:text-gray-400">Diskon</span>
+                    <span class="text-sm text-gray-600 dark:text-gray-400">
+                        <i class="fas fa-tags mr-1.5 text-gray-400"></i> Diskon
+                    </span>
                     <div class="flex items-center gap-1">
                         <input type="number" x-model="discount" min="0" max="100" 
                                class="w-12 px-1.5 py-0.5 rounded-lg border-2 border-gray-200 dark:border-gray-700 dark:bg-[#1a2835] dark:text-white text-sm text-right focus:border-[#1a5f7a] outline-none transition-all">
@@ -237,26 +269,34 @@
 
             <!-- Potongan -->
             <div class="flex justify-between items-center px-3 py-2 bg-red-50 dark:bg-red-950/20 rounded-xl">
-                <span class="text-sm text-gray-600 dark:text-gray-400">Potongan</span>
+                <span class="text-sm text-gray-600 dark:text-gray-400">
+                    <i class="fas fa-arrow-down mr-1.5 text-red-400"></i> Potongan
+                </span>
                 <span class="font-semibold text-sm text-red-500" x-text="'- Rp ' + formatNumber(discountAmount)"></span>
             </div>
 
             <!-- Grand Total -->
             <div class="flex justify-between items-center px-4 py-3 bg-[#1a5f7a]/10 dark:bg-[#1a5f7a]/20 rounded-xl border-2 border-[#1a5f7a]/30">
-                <span class="text-base font-bold text-gray-800 dark:text-gray-200">Total</span>
+                <span class="text-base font-bold text-gray-800 dark:text-gray-200">
+                    <i class="fas fa-calculator mr-2 text-[#1a5f7a]"></i> Total
+                </span>
                 <span class="text-xl font-bold text-[#1a5f7a] dark:text-[#5a9ab8]" x-text="'Rp ' + formatNumber(grandTotal)"></span>
             </div>
 
-            <!-- Payment & Change dalam 1 baris -->
+            <!-- Payment & Change -->
             <div class="grid grid-cols-2 gap-3 pt-2">
                 <div class="flex justify-between items-center px-3 py-2 bg-gray-50 dark:bg-[#1a2835] rounded-xl">
-                    <span class="text-sm text-gray-600 dark:text-gray-400">💰 Bayar</span>
+                    <span class="text-sm text-gray-600 dark:text-gray-400">
+                        <i class="fas fa-money-bill-wave mr-1.5 text-gray-400"></i> Bayar
+                    </span>
                     <input type="number" x-model="payment" min="0" 
                            class="w-20 px-2 py-1 rounded-lg border-2 border-gray-200 dark:border-gray-700 dark:bg-[#1a2835] dark:text-white text-sm text-right focus:border-[#1a5f7a] outline-none transition-all">
                 </div>
                 <div class="flex justify-between items-center px-3 py-2 rounded-xl" 
                      :class="change >= 0 ? 'bg-emerald-50 dark:bg-emerald-950/20' : 'bg-red-50 dark:bg-red-950/20'">
-                    <span class="text-sm text-gray-600 dark:text-gray-400">🔄 Kembali</span>
+                    <span class="text-sm text-gray-600 dark:text-gray-400">
+                        <i class="fas fa-rotate-left mr-1.5" :class="change >= 0 ? 'text-emerald-500' : 'text-red-500'"></i> Kembali
+                    </span>
                     <span class="font-bold text-sm" 
                           :class="change >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'">
                         <span x-text="change >= 0 ? 'Rp ' + formatNumber(change) : '❌ Kurang'"></span>
@@ -264,37 +304,37 @@
                 </div>
             </div>
 
-            <!-- ===== TOMBOL ACTION (Dikelompokkan & Dirapihkan) ===== -->
+            <!-- ===== TOMBOL ACTION ===== -->
             <div class="pt-3 border-t-2 border-gray-100 dark:border-gray-800">
-                <!-- Tombol Utama (Cetak, Kosongkan) -->
+                <!-- Tombol Utama -->
                 <div class="flex gap-2 mb-2">
                     <button @click="printReceipt()" 
-                            class="flex-1 py-2.5 rounded-xl bg-[#1a5f7a] hover:bg-[#154c62] text-white font-semibold text-sm transition-all duration-200 hover:shadow-lg hover:shadow-[#1a5f7a]/25 flex items-center justify-center gap-1.5">
-                        🖨️ Cetak
+                            class="flex-1 py-2.5 rounded-xl bg-[#1a5f7a] hover:bg-[#154c62] text-white font-semibold text-sm transition-all duration-200 hover:shadow-lg hover:shadow-[#1a5f7a]/25 flex items-center justify-center gap-2">
+                        <i class="fas fa-print"></i> Cetak
                     </button>
                     <button @click="clearCart()" 
-                            class="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-1.5">
-                        🗑️ Kosongkan
+                            class="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2">
+                        <i class="fas fa-trash"></i> Kosongkan
                     </button>
                 </div>
 
-                <!-- Tombol Data (Simpan, Load, Riwayat, Excel) - Lebih kecil & rapi -->
+                <!-- Tombol Data -->
                 <div class="flex gap-1.5 flex-wrap">
                     <button @click="saveData()" 
-                            class="flex-1 min-w-[44px] py-2 rounded-xl bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1">
-                        💾 Simpan
+                            class="flex-1 min-w-[44px] py-2 rounded-xl bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5">
+                        <i class="fas fa-save"></i> Simpan
                     </button>
                     <button @click="loadData()" 
-                            class="flex-1 min-w-[44px] py-2 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1">
-                        📂 Load
+                            class="flex-1 min-w-[44px] py-2 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5">
+                        <i class="fas fa-folder-open"></i> Load
                     </button>
                     <button @click="viewHistory()" 
-                            class="flex-1 min-w-[44px] py-2 rounded-xl bg-purple-500 hover:bg-purple-600 text-white text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1">
-                        📊 Riwayat
+                            class="flex-1 min-w-[44px] py-2 rounded-xl bg-purple-500 hover:bg-purple-600 text-white text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5">
+                        <i class="fas fa-clock-rotate-left"></i> Riwayat
                     </button>
                     <button @click="exportExcel()" 
-                            class="flex-1 min-w-[44px] py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1">
-                        📈 Excel
+                            class="flex-1 min-w-[44px] py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5">
+                        <i class="fas fa-file-excel"></i> Excel
                     </button>
                 </div>
             </div>
