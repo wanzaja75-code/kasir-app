@@ -17,26 +17,6 @@ body {
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
 }
 
-.glass-effect {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-}
-
-.dark .glass-effect {
-    background: rgba(26, 40, 54, 0.7);
-}
-
-/* ===== SCAN OVERLAY ANIMATION ===== */
-.scan-overlay-animated {
-    animation: pulse-border 2s ease-in-out infinite;
-}
-
-@keyframes pulse-border {
-    0%, 100% { border-color: rgba(255, 255, 255, 0.3); }
-    50% { border-color: rgba(255, 255, 255, 0.6); }
-}
-
 /* ===== FADE IN ===== */
 .fade-in {
     animation: fadeIn 0.3s ease;
@@ -45,16 +25,6 @@ body {
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-8px) scale(0.98); }
     to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* ===== SLIDE UP ===== */
-.slide-up {
-    animation: slideUp 0.3s ease;
-}
-
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
 }
 
 /* ===== CUSTOM SCROLLBAR ===== */
@@ -94,34 +64,11 @@ input[type=number] {
     background: #0b1320;
 }
 
-/* ===== CART ITEM BORDER ===== */
-.cart-item-border {
-    border-left: 4px solid #1a5f7a;
-}
-
-.dark .cart-item-border {
-    border-left-color: #3a7a9a;
-}
-
-/* ===== TOTAL CARDS ===== */
-.total-card {
-    transition: all 0.2s ease;
-}
-
-.total-card:hover {
-    transform: translateY(-1px);
-}
-
-/* ===== RESPONSIVE FIX ===== */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 480px) {
     .grid-cols-2 {
         grid-template-columns: 1fr 1fr;
         gap: 6px;
-    }
-    
-    .total-actions button {
-        font-size: 11px;
-        padding: 6px 4px;
     }
     
     .cart-item .item-name {
@@ -147,10 +94,9 @@ input[type=number] {
         gap: 4px;
     }
     
-    .flex.gap-1\\.5.flex-wrap button {
+    button .flex-1 {
         font-size: 10px;
         padding: 4px 6px;
-        min-width: 32px;
     }
 }
 
