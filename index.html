@@ -192,72 +192,111 @@
         </div>
     </div>
 
-    <!-- CART SECTION -->
+    <!-- ===== CART SECTION (FIX) ===== -->
     <div class="bg-white dark:bg-[#15202b] rounded-2xl p-4 md:p-5 shadow-sm transition-all duration-300 card-hover">
         <h2 class="text-base font-semibold text-gray-800 dark:text-gray-200 mb-3 pb-2 border-b-2 border-gray-100 dark:border-gray-800">🧾 Daftar Belanjaan</h2>
         
         <!-- Cart Items -->
-        <div class="max-h-72 overflow-y-auto mb-3 space-y-1" id="cartList">
+        <div class="max-h-64 overflow-y-auto mb-3 space-y-1" id="cartList">
             <template x-if="cart.length === 0">
                 <div class="text-center text-gray-400 dark:text-gray-600 py-6 text-sm">🛒 Belum ada barang</div>
             </template>
             <template x-for="(item, idx) in cart" :key="item.id">
-                <div class="flex items-center justify-between gap-2 p-3 bg-gray-50 dark:bg-[#1a2835] rounded-xl border-l-4 border-[#1a5f7a] transition-all duration-200 hover:bg-gray-100 dark:hover:bg-[#1f3040] fade-in">
-                    <span class="font-medium text-sm text-gray-800 dark:text-gray-200 flex-1 min-w-[50px]" x-text="item.name"></span>
-                    <span class="font-semibold text-sm text-[#1a5f7a] dark:text-[#5a9ab8]" x-text="'Rp ' + formatNumber(item.price)"></span>
-                    <div class="flex items-center gap-1">
-                        <button @click="changeQty(item.id, -1)" class="w-6 h-6 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 font-bold text-sm transition-all">−</button>
+                <div class="flex items-center justify-between gap-1.5 p-2.5 bg-gray-50 dark:bg-[#1a2835] rounded-xl border-l-4 border-[#1a5f7a] transition-all duration-200 hover:bg-gray-100 dark:hover:bg-[#1f3040] fade-in">
+                    <span class="font-medium text-sm text-gray-800 dark:text-gray-200 flex-1 min-w-[45px]" x-text="item.name"></span>
+                    <span class="font-semibold text-sm text-[#1a5f7a] dark:text-[#5a9ab8] whitespace-nowrap" x-text="'Rp ' + formatNumber(item.price)"></span>
+                    <div class="flex items-center gap-0.5">
+                        <button @click="changeQty(item.id, -1)" class="w-6 h-6 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 font-bold text-sm transition-all flex items-center justify-center">−</button>
                         <span class="w-5 text-center font-semibold text-sm" x-text="item.qty"></span>
-                        <button @click="changeQty(item.id, 1)" class="w-6 h-6 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 font-bold text-sm transition-all">+</button>
+                        <button @click="changeQty(item.id, 1)" class="w-6 h-6 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 font-bold text-sm transition-all flex items-center justify-center">+</button>
                     </div>
-                    <span class="font-bold text-sm text-gray-800 dark:text-gray-200 min-w-[55px] text-right" x-text="'Rp ' + formatNumber(item.price * item.qty)"></span>
-                    <button @click="removeItem(item.id)" class="text-red-500 hover:text-red-700 text-base font-bold px-1 transition-all">✕</button>
+                    <span class="font-bold text-sm text-gray-800 dark:text-gray-200 min-w-[50px] text-right" x-text="'Rp ' + formatNumber(item.price * item.qty)"></span>
+                    <button @click="removeItem(item.id)" class="text-red-500 hover:text-red-700 text-sm font-bold px-1 transition-all">✕</button>
                 </div>
             </template>
         </div>
 
-        <!-- Total -->
-        <div class="space-y-1.5 pt-2 border-t-2 border-gray-100 dark:border-gray-800">
-            <div class="flex justify-between text-sm">
-                <span class="text-gray-600 dark:text-gray-400">Subtotal</span>
-                <span class="font-semibold text-gray-800 dark:text-gray-200" x-text="'Rp ' + formatNumber(subtotal)"></span>
-            </div>
-            <div class="flex justify-between text-sm items-center">
-                <span class="text-gray-600 dark:text-gray-400">Diskon</span>
-                <div class="flex items-center gap-1.5">
-                    <input type="number" x-model="discount" min="0" max="100" 
-                           class="w-14 px-2 py-1 rounded-lg border-2 border-gray-200 dark:border-gray-700 dark:bg-[#1a2835] dark:text-white text-sm text-right focus:border-[#1a5f7a] outline-none transition-all">
-                    <span class="text-gray-600 dark:text-gray-400 text-sm">%</span>
+        <!-- ===== TOTAL SECTION (FIX - Lebih Rapi) ===== -->
+        <div class="space-y-2 pt-3 border-t-2 border-gray-100 dark:border-gray-800">
+            
+            <!-- Subtotal & Diskon dalam 1 baris -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="flex justify-between items-center px-3 py-2 bg-gray-50 dark:bg-[#1a2835] rounded-xl">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Subtotal</span>
+                    <span class="font-semibold text-sm text-gray-800 dark:text-gray-200" x-text="'Rp ' + formatNumber(subtotal)"></span>
+                </div>
+                <div class="flex justify-between items-center px-3 py-2 bg-gray-50 dark:bg-[#1a2835] rounded-xl">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Diskon</span>
+                    <div class="flex items-center gap-1">
+                        <input type="number" x-model="discount" min="0" max="100" 
+                               class="w-12 px-1.5 py-0.5 rounded-lg border-2 border-gray-200 dark:border-gray-700 dark:bg-[#1a2835] dark:text-white text-sm text-right focus:border-[#1a5f7a] outline-none transition-all">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">%</span>
+                    </div>
                 </div>
             </div>
-            <div class="flex justify-between text-sm">
-                <span class="text-gray-600 dark:text-gray-400">Potongan</span>
-                <span class="font-semibold text-red-500" x-text="'- Rp ' + formatNumber(discountAmount)"></span>
-            </div>
-            <div class="flex justify-between text-lg font-bold text-gray-800 dark:text-gray-200 pt-2 border-t-2 border-gray-100 dark:border-gray-800">
-                <span>Total</span>
-                <span x-text="'Rp ' + formatNumber(grandTotal)"></span>
-            </div>
-            
-            <!-- Payment -->
-            <div class="flex justify-between text-sm items-center pt-2 border-t-2 border-gray-100 dark:border-gray-800">
-                <span class="text-gray-600 dark:text-gray-400">💰 Uang Bayar</span>
-                <input type="number" x-model="payment" min="0" 
-                       class="w-24 px-2 py-1.5 rounded-lg border-2 border-gray-200 dark:border-gray-700 dark:bg-[#1a2835] dark:text-white text-sm text-right focus:border-[#1a5f7a] outline-none transition-all">
-            </div>
-            <div class="flex justify-between text-base font-bold" :class="change >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'">
-                <span>🔄 Kembalian</span>
-                <span x-text="change >= 0 ? 'Rp ' + formatNumber(change) : '❌ Kurang'"></span>
+
+            <!-- Potongan -->
+            <div class="flex justify-between items-center px-3 py-2 bg-red-50 dark:bg-red-950/20 rounded-xl">
+                <span class="text-sm text-gray-600 dark:text-gray-400">Potongan</span>
+                <span class="font-semibold text-sm text-red-500" x-text="'- Rp ' + formatNumber(discountAmount)"></span>
             </div>
 
-            <!-- Actions -->
-            <div class="flex gap-1.5 mt-3 flex-wrap">
-                <button @click="clearCart()" class="flex-1 min-w-[36px] py-2.5 rounded-xl bg-gray-100 dark:bg-[#1a2835] hover:bg-gray-200 dark:hover:bg-[#253544] text-gray-600 dark:text-gray-400 font-semibold text-sm transition-all">🗑️</button>
-                <button @click="printReceipt()" class="flex-1 min-w-[36px] py-2.5 rounded-xl bg-[#1a5f7a] hover:bg-[#154c62] text-white font-semibold text-sm transition-all hover:shadow-lg hover:shadow-[#1a5f7a]/25">🖨️</button>
-                <button @click="saveData()" class="flex-1 min-w-[36px] py-2.5 rounded-xl bg-gray-500 hover:bg-gray-600 text-white font-semibold text-sm transition-all">💾</button>
-                <button @click="loadData()" class="flex-1 min-w-[36px] py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white font-semibold text-sm transition-all">📂</button>
-                <button @click="viewHistory()" class="flex-1 min-w-[36px] py-2.5 rounded-xl bg-purple-500 hover:bg-purple-600 text-white font-semibold text-sm transition-all">📊</button>
-                <button @click="exportExcel()" class="flex-1 min-w-[36px] py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm transition-all">📈</button>
+            <!-- Grand Total -->
+            <div class="flex justify-between items-center px-4 py-3 bg-[#1a5f7a]/10 dark:bg-[#1a5f7a]/20 rounded-xl border-2 border-[#1a5f7a]/30">
+                <span class="text-base font-bold text-gray-800 dark:text-gray-200">Total</span>
+                <span class="text-xl font-bold text-[#1a5f7a] dark:text-[#5a9ab8]" x-text="'Rp ' + formatNumber(grandTotal)"></span>
+            </div>
+
+            <!-- Payment & Change dalam 1 baris -->
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <div class="flex justify-between items-center px-3 py-2 bg-gray-50 dark:bg-[#1a2835] rounded-xl">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">💰 Bayar</span>
+                    <input type="number" x-model="payment" min="0" 
+                           class="w-20 px-2 py-1 rounded-lg border-2 border-gray-200 dark:border-gray-700 dark:bg-[#1a2835] dark:text-white text-sm text-right focus:border-[#1a5f7a] outline-none transition-all">
+                </div>
+                <div class="flex justify-between items-center px-3 py-2 rounded-xl" 
+                     :class="change >= 0 ? 'bg-emerald-50 dark:bg-emerald-950/20' : 'bg-red-50 dark:bg-red-950/20'">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">🔄 Kembali</span>
+                    <span class="font-bold text-sm" 
+                          :class="change >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'">
+                        <span x-text="change >= 0 ? 'Rp ' + formatNumber(change) : '❌ Kurang'"></span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- ===== TOMBOL ACTION (Dikelompokkan & Dirapihkan) ===== -->
+            <div class="pt-3 border-t-2 border-gray-100 dark:border-gray-800">
+                <!-- Tombol Utama (Cetak, Kosongkan) -->
+                <div class="flex gap-2 mb-2">
+                    <button @click="printReceipt()" 
+                            class="flex-1 py-2.5 rounded-xl bg-[#1a5f7a] hover:bg-[#154c62] text-white font-semibold text-sm transition-all duration-200 hover:shadow-lg hover:shadow-[#1a5f7a]/25 flex items-center justify-center gap-1.5">
+                        🖨️ Cetak
+                    </button>
+                    <button @click="clearCart()" 
+                            class="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-1.5">
+                        🗑️ Kosongkan
+                    </button>
+                </div>
+
+                <!-- Tombol Data (Simpan, Load, Riwayat, Excel) - Lebih kecil & rapi -->
+                <div class="flex gap-1.5 flex-wrap">
+                    <button @click="saveData()" 
+                            class="flex-1 min-w-[44px] py-2 rounded-xl bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1">
+                        💾 Simpan
+                    </button>
+                    <button @click="loadData()" 
+                            class="flex-1 min-w-[44px] py-2 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1">
+                        📂 Load
+                    </button>
+                    <button @click="viewHistory()" 
+                            class="flex-1 min-w-[44px] py-2 rounded-xl bg-purple-500 hover:bg-purple-600 text-white text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1">
+                        📊 Riwayat
+                    </button>
+                    <button @click="exportExcel()" 
+                            class="flex-1 min-w-[44px] py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1">
+                        📈 Excel
+                    </button>
+                </div>
             </div>
         </div>
     </div>
