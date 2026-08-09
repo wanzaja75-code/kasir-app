@@ -4,29 +4,29 @@ function kasirApp() {
         darkMode: localStorage.getItem('theme') === 'dark',
         datetime: '',
         
-        // Method
+        // Method dengan icon Font Awesome
         methods: [
-            { id: 'manual', icon: '⌨️', label: 'Manual' },
-            { id: 'upload', icon: '📷', label: 'Upload' },
-            { id: 'camera', icon: '📹', label: 'Kamera' }
+            { id: 'manual', icon: 'fa-keyboard', label: 'Manual' },
+            { id: 'upload', icon: 'fa-upload', label: 'Upload' },
+            { id: 'camera', icon: 'fa-camera', label: 'Kamera' }
         ],
         activeMethod: 'manual',
         
         // Status
-        status: { icon: '📷', message: 'Pilih metode scan di bawah', type: 'info' },
+        status: { icon: 'fa-info-circle', message: 'Pilih metode scan di bawah', type: 'info' },
         
         // Input
         barcodeInput: '',
         searchQuery: '',
         
-        // Categories
+        // Categories dengan icon Font Awesome
         categories: [
-            { id: 'all', icon: '📦', label: 'Semua' },
-            { id: 'Makanan', icon: '🍜', label: 'Makanan' },
-            { id: 'Minuman', icon: '🥤', label: 'Minuman' },
-            { id: 'Snack', icon: '🍿', label: 'Snack' },
-            { id: 'Rokok', icon: '🚬', label: 'Rokok' },
-            { id: 'Lainnya', icon: '📦', label: 'Lainnya' }
+            { id: 'all', icon: 'fa-boxes', label: 'Semua' },
+            { id: 'Makanan', icon: 'fa-utensils', label: 'Makanan' },
+            { id: 'Minuman', icon: 'fa-mug-saucer', label: 'Minuman' },
+            { id: 'Snack', icon: 'fa-cookie-bite', label: 'Snack' },
+            { id: 'Rokok', icon: 'fa-smoking', label: 'Rokok' },
+            { id: 'Lainnya', icon: 'fa-box', label: 'Lainnya' }
         ],
         activeCategory: 'all',
         
@@ -98,13 +98,11 @@ function kasirApp() {
             return products.slice(0, 12);
         },
         
-        // ===== METHODS =====
+        // ===== METHODS (sama seperti sebelumnya) =====
         init() {
             this.updateDateTime();
             setInterval(() => this.updateDateTime(), 30000);
             this.loadData();
-            
-            // Load theme
             if (this.darkMode) {
                 document.documentElement.classList.add('dark');
             }
@@ -138,7 +136,7 @@ function kasirApp() {
             if (method !== 'camera' && this.cameraActive) {
                 this.stopCamera();
             }
-            this.setStatus('📷', 'Mode: ' + (method === 'manual' ? 'Manual Input' : method === 'upload' ? 'Upload Foto' : 'Kamera Live'), 'info');
+            this.setStatus('fa-info-circle', 'Mode: ' + (method === 'manual' ? 'Manual Input' : method === 'upload' ? 'Upload Foto' : 'Kamera Live'), 'info');
         },
         
         // ===== PRODUCTS =====
@@ -150,13 +148,13 @@ function kasirApp() {
         addItem() {
             const code = this.barcodeInput.trim();
             if (!code) {
-                this.setStatus('⚠️', 'Masukkan kode barcode', 'error');
+                this.setStatus('fa-exclamation-circle', 'Masukkan kode barcode', 'error');
                 return;
             }
             
             const product = this.productDB[code];
             if (!product) {
-                this.setStatus('❌', `Kode "${code}" tidak ditemukan`, 'error');
+                this.setStatus('fa-exclamation-circle', `Kode "${code}" tidak ditemukan`, 'error');
                 this.barcodeInput = '';
                 return;
             }
@@ -175,7 +173,7 @@ function kasirApp() {
             }
             
             this.barcodeInput = '';
-            this.setStatus('✅', `${product.name} ditambahkan!`, 'success');
+            this.setStatus('fa-check-circle', `${product.name} ditambahkan!`, 'success');
             this.saveData();
         },
         
@@ -207,22 +205,20 @@ function kasirApp() {
         addNewProduct() {
             const { barcode, name, category, price } = this.newProduct;
             if (!barcode || !name || !price || isNaN(price) || price <= 0) {
-                this.setStatus('⚠️', 'Isi semua data dengan benar!', 'error');
+                this.setStatus('fa-exclamation-circle', 'Isi semua data dengan benar!', 'error');
                 return;
             }
             if (this.productDB[barcode]) {
-                this.setStatus('⚠️', `Kode "${barcode}" sudah ada!`, 'error');
+                this.setStatus('fa-exclamation-circle', `Kode "${barcode}" sudah ada!`, 'error');
                 return;
             }
             this.productDB[barcode] = { name, price: parseInt(price), category };
             this.newProduct = { barcode: '', name: '', category: 'Makanan', price: '' };
-            this.setStatus('✅', `"${name}" berhasil ditambahkan!`, 'success');
+            this.setStatus('fa-check-circle', `"${name}" berhasil ditambahkan!`, 'success');
             this.saveData();
         },
         
-        searchProduct() {
-            // Handled by Alpine computed
-        },
+        searchProduct() {},
         
         filterCategory(category) {
             this.activeCategory = category;
@@ -277,11 +273,11 @@ function kasirApp() {
         async startCamera() {
             try {
                 if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    this.setStatus('❌', 'Browser tidak support kamera', 'error');
+                    this.setStatus('fa-exclamation-circle', 'Browser tidak support kamera', 'error');
                     return;
                 }
                 
-                this.setStatus('📷', 'Mengakses kamera...', 'info');
+                this.setStatus('fa-camera', 'Mengakses kamera...', 'info');
                 
                 this.cameraStream = await navigator.mediaDevices.getUserMedia({
                     video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
@@ -293,13 +289,13 @@ function kasirApp() {
                 await video.play();
                 
                 this.cameraActive = true;
-                this.setStatus('📷', 'Kamera aktif - Arahkan ke barcode', 'active');
+                this.setStatus('fa-camera', 'Kamera aktif - Arahkan ke barcode', 'active');
                 
                 this.scanLoop();
                 
                 this.scanTimeout = setTimeout(() => {
                     if (this.cameraActive) {
-                        this.setStatus('⏱️', 'Waktu habis, scan ulang', 'info');
+                        this.setStatus('fa-clock', 'Waktu habis, scan ulang', 'info');
                         this.stopCamera();
                     }
                 }, 15000);
@@ -309,7 +305,7 @@ function kasirApp() {
                 if (err.name === 'NotAllowedError') msg += 'Izin ditolak.';
                 else if (err.name === 'NotFoundError') msg += 'Tidak ada kamera.';
                 else msg += err.message;
-                this.setStatus('❌', msg, 'error');
+                this.setStatus('fa-exclamation-circle', msg, 'error');
                 this.stopCamera();
             }
         },
@@ -326,7 +322,7 @@ function kasirApp() {
                 clearTimeout(this.scanTimeout);
                 this.scanTimeout = null;
             }
-            this.setStatus('📷', 'Kamera dimatikan', 'info');
+            this.setStatus('fa-camera', 'Kamera dimatikan', 'info');
         },
         
         scanLoop() {
@@ -349,10 +345,10 @@ function kasirApp() {
                     this.barcodeInput = barcode;
                     const product = this.productDB[barcode];
                     if (product) {
-                        this.setStatus('✅', `${product.name} - Rp ${product.price.toLocaleString()}`, 'success');
+                        this.setStatus('fa-check-circle', `${product.name} - Rp ${product.price.toLocaleString()}`, 'success');
                         if (navigator.vibrate) navigator.vibrate(100);
                     } else {
-                        this.setStatus('⚠️', `Kode "${barcode}" tidak ditemukan`, 'error');
+                        this.setStatus('fa-exclamation-circle', `Kode "${barcode}" tidak ditemukan`, 'error');
                     }
                     this.stopCamera();
                     setTimeout(() => this.addItem(), 300);
@@ -372,18 +368,22 @@ function kasirApp() {
         saveData() {
             const data = { cart: this.cart, products: this.productDB, timestamp: new Date().toISOString() };
             localStorage.setItem('kasirData', JSON.stringify(data));
+            this.setStatus('fa-check-circle', 'Data tersimpan!', 'success');
         },
         
         loadData() {
             const saved = localStorage.getItem('kasirData');
-            if (!saved) return;
+            if (!saved) {
+                this.setStatus('fa-info-circle', 'Tidak ada data tersimpan', 'info');
+                return;
+            }
             try {
                 const data = JSON.parse(saved);
                 if (data.cart) this.cart = data.cart;
                 if (data.products) Object.assign(this.productDB, data.products);
-                this.setStatus('📂', 'Data berhasil dimuat!', 'success');
+                this.setStatus('fa-check-circle', 'Data berhasil dimuat!', 'success');
             } catch (e) {
-                this.setStatus('❌', 'Gagal memuat data', 'error');
+                this.setStatus('fa-exclamation-circle', 'Gagal memuat data', 'error');
             }
         },
         
@@ -436,6 +436,7 @@ function kasirApp() {
             a.download = `Laporan_Transaksi_${new Date().toISOString().slice(0,10)}.csv`;
             a.click();
             URL.revokeObjectURL(url);
+            this.setStatus('fa-check-circle', 'Export Excel berhasil!', 'success');
         },
         
         // ===== PRINT =====
