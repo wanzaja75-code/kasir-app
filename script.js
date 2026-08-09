@@ -241,7 +241,7 @@ function loadZXing(callback) {
     }
 
     const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/zxing/0.1.0/index.min.js';
+    script.src = 'https://cdn.jsdelivr.net/npm/@zxing/browser@latest/umd/index.min.js';
     script.onload = callback;
     script.onerror = () => {
         setStatus('❌ Gagal load library scanner', 'error');
