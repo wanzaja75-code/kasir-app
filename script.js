@@ -487,3 +487,35 @@ updateTotals();
 
 console.log('📦 Produk:', Object.keys(productDB).length);
 console.log('📷 Pilih metode: Manual | Upload Foto | Kamera');
+
+// ============================================
+// TAMBAH PRODUK BARU
+// ============================================
+function addNewProduct() {
+    const code = document.getElementById('newBarcode').value.trim();
+    const name = document.getElementById('newName').value.trim();
+    const price = parseInt(document.getElementById('newPrice').value);
+
+    if (!code || !name || isNaN(price) || price <= 0) {
+        showResult('⚠️ Isi semua data dengan benar!', 'error');
+        return;
+    }
+
+    if (productDB[code]) {
+        showResult(`⚠️ Kode "${code}" sudah ada!`, 'error');
+        return;
+    }
+
+    productDB[code] = { name, price };
+    showResult(`✅ "${name}" berhasil ditambahkan!`, 'success');
+
+    // Reset input
+    document.getElementById('newBarcode').value = '';
+    document.getElementById('newName').value = '';
+    document.getElementById('newPrice').value = '';
+
+    // Refresh quick products
+    renderQuickProducts();
+
+    console.log('📦 Produk baru:', code, name, price);
+}
