@@ -3,9 +3,23 @@
 // ============================================
 const productDB = {
     "8991234567890": { name: "Indomie Goreng", price: 3500, category: "Makanan" },
+    "8991234567891": { name: "Indomie Kuah", price: 3500, category: "Makanan" },
     "8991234567892": { name: "Teh Pucuk 350ml", price: 4500, category: "Minuman" },
+    "8991234567893": { name: "Aqua 600ml", price: 3000, category: "Minuman" },
+    "8991234567894": { name: "Roti Tawar", price: 12000, category: "Makanan" },
+    "8991234567895": { name: "Mie Sedap Goreng", price: 3200, category: "Makanan" },
+    "8991234567896": { name: "Mie Sedap Kuah", price: 3200, category: "Makanan" },
     "8991234567897": { name: "Chitato 68g", price: 8500, category: "Snack" },
-    // Tambah category di semua produk
+    "8991234567898": { name: "Pocky Strawberry", price: 9500, category: "Snack" },
+    "8991234567899": { name: "Pocky Chocolate", price: 9500, category: "Snack" },
+    "1234567890123": { name: "Coca Cola 1.5L", price: 15000, category: "Minuman" },
+    "9876543210987": { name: "Pepsi 1.5L", price: 14000, category: "Minuman" },
+    "1111111111111": { name: "Sprite 1.5L", price: 14000, category: "Minuman" },
+    "7777777777777": { name: "Fanta 1.5L", price: 14000, category: "Minuman" },
+    "8888888888888": { name: "Marlboro Red", price: 28000, category: "Rokok" },
+    "9999999999999": { name: "Sampoerna Mild", price: 26000, category: "Rokok" },
+    "4444444444444": { name: "Sabun Lifebuoy", price: 4500, category: "Lainnya" },
+    "5555555555555": { name: "Pasta Gigi Pepsodent", price: 8000, category: "Lainnya" },
 };
 
 // ============================================
@@ -16,6 +30,7 @@ let scannerActive = false;
 let scanTimeout = null;
 let stream = null;
 let history = JSON.parse(localStorage.getItem('kasirHistory') || '[]');
+let currentCategory = 'all';
 
 // ============================================
 // DOM
@@ -33,6 +48,8 @@ const discountAmountEl = document.getElementById('discountAmount');
 const grandTotalEl = document.getElementById('grandTotal');
 const quickProducts = document.getElementById('quickProducts');
 const fileInput = document.getElementById('fileInput');
+const paymentInput = document.getElementById('paymentInput');
+const changeAmountEl = document.getElementById('changeAmount');
 
 // ============================================
 // DATE TIME
@@ -49,18 +66,22 @@ setInterval(updateDateTime, 30000);
 // ============================================
 // QUICK PRODUCTS
 // ============================================
-function renderQuickProducts() {
-    const entries = Object.entries(productDB).slice(0, 8);
+function renderQuickProducts(category = 'all') {
+    let entries = Object.entries(productDB);
+    if (category !== 'all') {
+        entries = entries.filter(([code, p]) => p.category === category);
+    }
+    entries = entries.slice(0, 10);
     quickProducts.innerHTML = entries.map(([code, p]) =>
         `<button onclick="quickAdd('${code}')">${p.name}</button>`
     ).join('');
 }
+renderQuickProducts();
 
 function quickAdd(code) {
     barcodeInput.value = code;
     addItemByBarcode();
 }
-renderQuickProducts();
 
 // ============================================
 // SWITCH METHOD
@@ -143,7 +164,7 @@ function setStatus(msg, type = '') {
 }
 
 function showResult(msg, type = '') {
-    const el = document.getElementById('uploadResult') || document.getElementById('scanResult');
+    const el = document.getElementById('uploadResult');
     if (!el) return;
     el.textContent = msg;
     el.className = 'scan-result show';
@@ -281,34 +302,74 @@ function scanLoop() {
 }
 
 // ============================================
+// CATEGORY FILTER
+// ============================================
+function filterCategory(category) {
+    currentCategory = category;
+    
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    const activeBtn = document.querySelector(`.cat-btn[data-cat="${category}"]`);
+    if (activeBtn) activeBtn.classList.add('active');
+    
+    renderQuickProducts(category);
+}
+
+// ============================================
+// SEARCH PRODUCT
+// ============================================
+function searchProduct() {
+    const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+    if (!keyword) {
+        renderQuickProducts(currentCategory);
+        return;
+    }
+    
+    const entries = Object.entries(productDB).filter(([code, p]) => 
+        p.name.toLowerCase().includes(keyword) || code.includes(keyword)
+    );
+    
+    if (currentCategory !== 'all') {
+        entries = entries.filter(([code, p]) => p.category === currentCategory);
+    }
+    
+    quickProducts.innerHTML = entries.slice(0, 10).map(([code, p]) =>
+        `<button onclick="quickAdd('${code}')">${p.name}</button>`
+    ).join('');
+}
+
+// ============================================
 // TAMBAH PRODUK BARU
 // ============================================
 function addNewProduct() {
     const code = document.getElementById('newBarcode').value.trim();
     const name = document.getElementById('newName').value.trim();
+    const category = document.getElementById('newCategory').value;
     const price = parseInt(document.getElementById('newPrice').value);
 
     if (!code || !name || isNaN(price) || price <= 0) {
-        showResult('⚠️ Isi semua data dengan benar!', 'error');
+        showUploadResult('⚠️ Isi semua data dengan benar!', 'error');
         return;
     }
 
     if (productDB[code]) {
-        showResult(`⚠️ Kode "${code}" sudah ada!`, 'error');
+        showUploadResult(`⚠️ Kode "${code}" sudah ada!`, 'error');
         return;
     }
 
-    productDB[code] = { name, price };
-    showResult(`✅ "${name}" berhasil ditambahkan!`, 'success');
+    productDB[code] = { name, price, category };
+    showUploadResult(`✅ "${name}" berhasil ditambahkan!`, 'success');
 
     document.getElementById('newBarcode').value = '';
     document.getElementById('newName').value = '';
     document.getElementById('newPrice').value = '';
 
-    renderQuickProducts();
+    renderQuickProducts(currentCategory);
     saveData();
 
-    console.log('📦 Produk baru:', code, name, price);
+    console.log('📦 Produk baru:', code, name, price, category);
 }
 
 // ============================================
@@ -317,13 +378,13 @@ function addNewProduct() {
 function addItemByBarcode() {
     const code = barcodeInput.value.trim();
     if (!code) {
-        showResult('⚠️ Masukkan kode barcode', 'error');
+        showUploadResult('⚠️ Masukkan kode barcode', 'error');
         return;
     }
 
     const product = productDB[code];
     if (!product) {
-        showResult(`❌ Kode "${code}" tidak ditemukan`, 'error');
+        showUploadResult(`❌ Kode "${code}" tidak ditemukan`, 'error');
         barcodeInput.value = '';
         barcodeInput.focus();
         return;
@@ -348,7 +409,7 @@ function addItemByBarcode() {
     updateTotals();
     saveData();
 
-    showResult(`✅ ${product.name} ditambahkan!`, 'success');
+    showUploadResult(`✅ ${product.name} ditambahkan!`, 'success');
 }
 
 function removeItem(id) {
@@ -419,9 +480,26 @@ function updateTotals() {
 
     const grandTotal = subtotal - discountAmount;
     grandTotalEl.textContent = `Rp ${Math.round(grandTotal).toLocaleString()}`;
+
+    // Update payment
+    if (paymentInput) {
+        const event = new Event('input');
+        paymentInput.dispatchEvent(event);
+    }
 }
 
 discountInput.addEventListener('input', updateTotals);
+
+// ============================================
+// PEMBAYARAN & KEMBALIAN
+// ============================================
+paymentInput.addEventListener('input', function() {
+    const total = parseInt(grandTotalEl.textContent.replace(/[^0-9]/g, '')) || 0;
+    const payment = parseInt(this.value) || 0;
+    const change = payment - total;
+    changeAmountEl.textContent = change >= 0 ? `Rp ${change.toLocaleString()}` : '❌ Kurang';
+    changeAmountEl.style.color = change >= 0 ? '#28a745' : '#dc3545';
+});
 
 // ============================================
 // SAVE & LOAD DATA
@@ -439,7 +517,7 @@ function saveData() {
 function loadData() {
     const saved = localStorage.getItem('kasirData');
     if (!saved) {
-        showResult('📭 Tidak ada data tersimpan', '');
+        showUploadResult('📭 Tidak ada data tersimpan', '');
         return;
     }
 
@@ -452,13 +530,13 @@ function loadData() {
         }
         if (data.products) {
             Object.assign(productDB, data.products);
-            renderQuickProducts();
+            renderQuickProducts(currentCategory);
         }
-        showResult('📂 Data berhasil dimuat!', 'success');
+        showUploadResult('📂 Data berhasil dimuat!', 'success');
         console.log('📂 Data dimuat:', new Date(data.timestamp).toLocaleString());
     } catch (e) {
         console.error('Gagal load data:', e);
-        showResult('❌ Gagal memuat data', 'error');
+        showUploadResult('❌ Gagal memuat data', 'error');
     }
 }
 
@@ -512,6 +590,32 @@ function viewHistory() {
 }
 
 // ============================================
+// EXPORT EXCEL
+// ============================================
+function exportExcel() {
+    if (history.length === 0) {
+        alert('📭 Belum ada data transaksi!');
+        return;
+    }
+
+    let csv = 'No,Tanggal,Item,Total\n';
+    history.forEach((t, i) => {
+        const date = new Date(t.date).toLocaleString('id-ID');
+        t.items.forEach(item => {
+            csv += `${i+1},${date},${item.name} x${item.qty},Rp ${(item.price * item.qty).toLocaleString()}\n`;
+        });
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Laporan_Transaksi_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// ============================================
 // PRINT
 // ============================================
 function printReceipt() {
@@ -520,7 +624,6 @@ function printReceipt() {
         return;
     }
 
-    // Simpan transaksi sebelum print
     saveTransaction();
 
     const now = new Date();
@@ -531,6 +634,9 @@ function printReceipt() {
     const discountPercent = parseFloat(discountInput.value) || 0;
     const discountAmount = (subtotal * discountPercent) / 100;
     const grandTotal = subtotal - discountAmount;
+
+    const payment = parseInt(paymentInput.value) || 0;
+    const change = payment - grandTotal;
 
     let html = `
         <div id="receiptPrint" style="font-family: monospace; padding: 20px; max-width: 320px; margin: 0 auto; background: white;">
@@ -562,6 +668,16 @@ function printReceipt() {
                 <span>TOTAL</span>
                 <span>Rp ${Math.round(grandTotal).toLocaleString()}</span>
             </div>
+            ${payment > 0 ? `
+            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-top: 4px;">
+                <span>Uang Bayar</span>
+                <span>Rp ${payment.toLocaleString()}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; color: #28a745;">
+                <span>Kembalian</span>
+                <span>Rp ${change >= 0 ? change.toLocaleString() : '0'}</span>
+            </div>
+            ` : ''}
             <hr style="border: 1px dashed #999; margin: 8px 0;" />
             <p style="text-align: center; font-size: 11px; color: #999;">Terima kasih 🙏</p>
         </div>
@@ -571,6 +687,22 @@ function printReceipt() {
     win.document.write(`<html><head><title>Struk</title></head><body style="margin:0;">${html}</body></html>`);
     win.document.close();
     setTimeout(() => win.print(), 500);
+}
+
+// ============================================
+// DARK MODE
+// ============================================
+function toggleTheme() {
+    document.body.classList.toggle('dark');
+    const btn = event.target;
+    btn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+    localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+}
+
+// Load theme
+if (localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark');
+    document.querySelector('.theme-toggle').textContent = '☀️';
 }
 
 // ============================================
@@ -593,120 +725,4 @@ loadData();
 console.log('📦 Produk:', Object.keys(productDB).length);
 console.log('📷 Pilih metode: Manual | Upload Foto | Kamera');
 console.log('📊 Riwayat transaksi:', history.length);
-
-// ============================================
-// EXPORT EXCEL
-// ============================================
-function exportExcel() {
-    if (history.length === 0) {
-        alert('📭 Belum ada data transaksi!');
-        return;
-    }
-
-    // Buat data CSV
-    let csv = 'No,Tanggal,Item,Total\n';
-    history.forEach((t, i) => {
-        const date = new Date(t.date).toLocaleString('id-ID');
-        t.items.forEach(item => {
-            csv += `${i+1},${date},${item.name} x${item.qty},Rp ${(item.price * item.qty).toLocaleString()}\n`;
-        });
-    });
-
-    // Download
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Laporan_Transaksi_${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-}
-
-// ============================================
-// FILTER KATEGORI
-// ============================================
-let currentCategory = 'all';
-
-function filterCategory(category) {
-    currentCategory = category;
-    
-    // Update tombol aktif
-    document.querySelectorAll('.cat-btn').forEach(btn => {
-        btn.style.background = 'transparent';
-        btn.style.color = '#1e293b';
-    });
-    event.target.style.background = '#1a6d8a';
-    event.target.style.color = 'white';
-    
-    renderQuickProducts(category);
-}
-
-function renderQuickProducts(category = 'all') {
-    let entries = Object.entries(productDB);
-    if (category !== 'all') {
-        entries = entries.filter(([code, p]) => p.category === category);
-    }
-    entries = entries.slice(0, 8);
-    quickProducts.innerHTML = entries.map(([code, p]) =>
-        `<button onclick="quickAdd('${code}')">${p.name}</button>`
-    ).join('');
-}
-
-// ============================================
-// PEMBAYARAN & KEMBALIAN
-// ============================================
-document.getElementById('paymentInput')?.addEventListener('input', function() {
-    const total = parseInt(grandTotalEl.textContent.replace(/[^0-9]/g, '')) || 0;
-    const payment = parseInt(this.value) || 0;
-    const change = payment - total;
-    document.getElementById('changeAmount').textContent = change >= 0 ? `Rp ${change.toLocaleString()}` : '❌ Kurang';
-    document.getElementById('changeAmount').style.color = change >= 0 ? '#28a745' : '#dc3545';
-});
-
-// Update di function updateTotals():
-function updateTotals() {
-    // ... kode existing ...
-    
-    // Trigger ulang payment
-    const paymentInput = document.getElementById('paymentInput');
-    if (paymentInput) {
-        const event = new Event('input');
-        paymentInput.dispatchEvent(event);
-    }
-}
-
-// ============================================
-// SEARCH PRODUK
-// ============================================
-function searchProduct() {
-    const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
-    if (!keyword) {
-        renderQuickProducts(currentCategory || 'all');
-        return;
-    }
-    
-    const entries = Object.entries(productDB).filter(([code, p]) => 
-        p.name.toLowerCase().includes(keyword) || code.includes(keyword)
-    );
-    
-    quickProducts.innerHTML = entries.slice(0, 10).map(([code, p]) =>
-        `<button onclick="quickAdd('${code}')">${p.name}</button>`
-    ).join('');
-}
-
-// ============================================
-// DARK MODE
-// ============================================
-function toggleTheme() {
-    document.body.classList.toggle('dark');
-    const btn = event.target;
-    btn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
-    
-    // Simpan preferensi
-    localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
-}
-
-// Load theme saat startup
-if (localStorage.getItem('theme') === 'dark') {
-    document.body.classList.add('dark');
-            }
+console.log('🌙 Dark mode:', document.body.classList.contains('dark') ? 'ON' : 'OFF');
