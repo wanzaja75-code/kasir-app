@@ -81,7 +81,7 @@ function loadQuagga(callback) {
     setStatus('⏳ Memuat scanner...', '');
 
     const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js';
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/zxing/0.1.0/index.min.js';
     script.onload = () => {
         console.log('✅ Quagga loaded');
         callback();
